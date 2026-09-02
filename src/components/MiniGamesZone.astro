@@ -560,11 +560,12 @@
   const bugsContainer = document.getElementById('bugs-container')!;
   const messages = ["Eres mi todo", "Te amo infinitamente", "Mi cielito hermoso", "Gracias por existir"];
   
-  // Frecuencia moderada de aparición (cada 1200ms con 35% de probabilidad)
+  // Frecuencia reducida: 1 bug cada ~3 segundos, máximo 3 en pantalla
   setInterval(() => {
     if(!modal.classList.contains('hidden')) return;
+    if(bugsContainer.children.length >= 3) return; // No saturar la pantalla
     
-    if(Math.random() > 0.65) {
+    if(Math.random() > 0.75) {
       const bug = document.createElement('div');
       bug.className = "fixed text-3xl cursor-pointer pointer-events-auto hover:scale-150 transition-transform animate-float z-50";
       bug.style.left = Math.random() * 90 + 'vw';
@@ -589,6 +590,6 @@
       // Desaparecen más rápido (4 segundos) para que sea un reto
       setTimeout(() => { if(bug.parentNode) bug.remove(); }, 4000);
     }
-  }, 1200);
+  }, 3000);
 
 </script>
