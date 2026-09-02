@@ -251,13 +251,35 @@
       };
     }
 
+    function getCellFromPoint(clientX: number, clientY: number): HTMLDivElement | null {
+      const target = document.elementFromPoint(clientX, clientY) as HTMLDivElement;
+      if (target && target.dataset.index) return target;
+      
+      // Fallback matemático para móviles si el touch cae justo entre letras
+      const grid = document.getElementById('word-grid')!;
+      const rect = grid.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      
+      if (x < 0 || x > rect.width || y < 0 || y > rect.height) return null;
+      
+      const col = Math.floor((x / rect.width) * 10);
+      const row = Math.floor((y / rect.height) * 10);
+      
+      // Asegurarse de que row y col estén entre 0 y 9
+      if(col >= 0 && col <= 9 && row >= 0 && row <= 9) {
+         return document.querySelector(`[data-row="${row}"][data-col="${col}"]`) as HTMLDivElement;
+      }
+      return null;
+    }
+
     function handleDown(e: Event) {
       if (e.type === 'touchstart') e.preventDefault(); // Crucial para móviles, evita que el navegador intercepte el gesto
       
       const clientX = e.type === 'touchstart' ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
       const clientY = e.type === 'touchstart' ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
       
-      const target = document.elementFromPoint(clientX, clientY) as HTMLDivElement;
+      const target = getCellFromPoint(clientX, clientY);
       if (!target || !target.dataset.index) return;
       
       isDrawing = true;
@@ -291,7 +313,7 @@
         clientY = (e as MouseEvent).clientY;
       }
 
-      const target = document.elementFromPoint(clientX, clientY) as HTMLDivElement;
+      const target = getCellFromPoint(clientX, clientY);
       if (target && target.dataset.index) {
         const center = getCenter(target);
         currentLine.setAttribute('x2', center.x.toString());
@@ -312,7 +334,7 @@
         clientY = (e as MouseEvent).clientY;
       }
 
-      const endCell = document.elementFromPoint(clientX, clientY) as HTMLDivElement;
+      const endCell = getCellFromPoint(clientX, clientY);
       
       if (endCell && endCell.dataset.index) {
         const center = getCenter(endCell);
