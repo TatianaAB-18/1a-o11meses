@@ -87,19 +87,27 @@
 
   // --- Juego de Sopa de Letras ---
   const wordSearchHTML = `
-    <h3 class="text-3xl font-display text-yellow-400 mb-4">Sopa de Letras</h3>
-    <p class="mb-4 text-xs md:text-sm">
-      <span id="word-BESOS" class="mx-1 font-bold transition-all">BESOS</span> |
-      <span id="word-CONFIANZA" class="mx-1 font-bold transition-all">CONFIANZA</span> |
-      <span id="word-RISAS" class="mx-1 font-bold transition-all">RISAS</span> |
-      <span id="word-PACIENCIA" class="mx-1 font-bold transition-all">PACIENCIA</span> <br/>
-      <span id="word-MAGIA" class="mx-1 font-bold transition-all">MAGIA</span> |
-      <span id="word-ABRAZOS" class="mx-1 font-bold transition-all">ABRAZOS</span> |
-      <span id="word-FUTURO" class="mx-1 font-bold transition-all">FUTURO</span> |
-      <span id="word-AMOR" class="mx-1 font-bold transition-all">AMOR</span>
+    <h3 class="text-3xl font-display text-yellow-400 mb-2">Sopa de Letras</h3>
+    <p class="mb-3 text-xs text-yellow-200">👆 Toca la <b>primera letra</b>, luego toca la <b>última letra</b> de cada palabra</p>
+    <p class="mb-3 text-[10px] md:text-xs flex flex-wrap justify-center gap-x-2 gap-y-1">
+      <span id="word-BESOS" class="font-bold transition-all">BESOS</span>
+      <span class="text-gray-500">|</span>
+      <span id="word-CONFIANZA" class="font-bold transition-all">CONFIANZA</span>
+      <span class="text-gray-500">|</span>
+      <span id="word-RISAS" class="font-bold transition-all">RISAS</span>
+      <span class="text-gray-500">|</span>
+      <span id="word-PACIENCIA" class="font-bold transition-all">PACIENCIA</span>
+      <span class="text-gray-500">|</span>
+      <span id="word-MAGIA" class="font-bold transition-all">MAGIA</span>
+      <span class="text-gray-500">|</span>
+      <span id="word-ABRAZOS" class="font-bold transition-all">ABRAZOS</span>
+      <span class="text-gray-500">|</span>
+      <span id="word-FUTURO" class="font-bold transition-all">FUTURO</span>
+      <span class="text-gray-500">|</span>
+      <span id="word-AMOR" class="font-bold transition-all">AMOR</span>
     </p>
-    <div class="relative max-w-[300px] mx-auto select-none touch-none" id="ws-container">
-      <div id="word-grid" class="grid grid-cols-10 gap-0 bg-white/10 p-2 rounded font-mono text-lg font-bold cursor-pointer">
+    <div class="relative max-w-[310px] mx-auto select-none" id="ws-container">
+      <div id="word-grid" class="grid grid-cols-10 gap-0 bg-white/10 p-2 rounded font-mono text-sm font-bold cursor-pointer">
       </div>
       <svg id="ws-svg" class="absolute top-0 left-0 w-full h-full pointer-events-none" style="z-index: 10;">
       </svg>
@@ -240,7 +248,7 @@
     letters.forEach((l, i) => {
       const div = document.createElement('div');
       div.innerText = l;
-      div.className = "w-[28px] h-[28px] flex items-center justify-center rounded select-none";
+      div.className = "w-[28px] h-[28px] flex items-center justify-center rounded select-none text-sm font-bold cursor-pointer transition-all duration-150";
       div.dataset.index = i.toString();
       div.dataset.row = Math.floor(i / 10).toString();
       div.dataset.col = (i % 10).toString();
@@ -248,9 +256,8 @@
       cells.push(div);
     });
 
-    let isDrawing = false;
+    // --- Sistema TAP-TAP (primero tocas inicio, luego fin) ---
     let startCell: HTMLDivElement | null = null;
-    let currentLine: SVGLineElement | null = null;
 
     function getCenter(el: HTMLElement) {
       const rect1 = container.getBoundingClientRect();
@@ -262,170 +269,114 @@
     }
 
     function getCellFromPoint(clientX: number, clientY: number): HTMLDivElement | null {
-      const target = document.elementFromPoint(clientX, clientY) as HTMLDivElement;
-      if (target && target.dataset.index) return target;
-      
-      // Fallback matemático para móviles si el touch cae justo entre letras
+      // Cálculo matemático exacto de la celda según posición del dedo
       const grid = document.getElementById('word-grid')!;
       const rect = grid.getBoundingClientRect();
       const x = clientX - rect.left;
       const y = clientY - rect.top;
-      
       if (x < 0 || x > rect.width || y < 0 || y > rect.height) return null;
-      
-      const col = Math.floor((x / rect.width) * 10);
-      const row = Math.floor((y / rect.height) * 10);
-      
-      // Asegurarse de que row y col estén entre 0 y 9
-      if(col >= 0 && col <= 9 && row >= 0 && row <= 9) {
-         return document.querySelector(`[data-row="${row}"][data-col="${col}"]`) as HTMLDivElement;
-      }
-      return null;
+      const col = Math.min(9, Math.floor((x / rect.width) * 10));
+      const row = Math.min(9, Math.floor((y / rect.height) * 10));
+      return document.querySelector(`[data-row="${row}"][data-col="${col}"]`) as HTMLDivElement;
     }
 
-    function handleDown(e: Event) {
-      if (e.type === 'touchstart') e.preventDefault(); // Crucial para móviles, evita que el navegador intercepte el gesto
-      
-      const clientX = e.type === 'touchstart' ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
-      const clientY = e.type === 'touchstart' ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
-      
-      const target = getCellFromPoint(clientX, clientY);
-      if (!target || !target.dataset.index) return;
-      
-      isDrawing = true;
-      startCell = target;
-      
-      currentLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      const center = getCenter(startCell);
-      
-      currentLine.setAttribute('x1', center.x.toString());
-      currentLine.setAttribute('y1', center.y.toString());
-      currentLine.setAttribute('x2', center.x.toString());
-      currentLine.setAttribute('y2', center.y.toString());
-      currentLine.setAttribute('stroke', colors[colorIndex % colors.length]);
-      currentLine.setAttribute('stroke-width', '24');
-      currentLine.setAttribute('stroke-linecap', 'round');
-      currentLine.setAttribute('opacity', '0.8');
-      
-      svgEl.appendChild(currentLine);
+    function drawLine(start: HTMLDivElement, end: HTMLDivElement, color: string) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      const c1 = getCenter(start);
+      const c2 = getCenter(end);
+      line.setAttribute('x1', c1.x.toString());
+      line.setAttribute('y1', c1.y.toString());
+      line.setAttribute('x2', c2.x.toString());
+      line.setAttribute('y2', c2.y.toString());
+      line.setAttribute('stroke', color);
+      line.setAttribute('stroke-width', '26');
+      line.setAttribute('stroke-linecap', 'round');
+      line.setAttribute('opacity', '0.75');
+      svgEl.appendChild(line);
+      return line;
     }
 
-    function handleMove(e: Event) {
-      if (!isDrawing || !currentLine || !startCell) return;
-      e.preventDefault(); // Evitar scroll
-      
-      let clientX, clientY;
-      if (e.type === 'touchmove') {
-        clientX = (e as TouchEvent).touches[0].clientX;
-        clientY = (e as TouchEvent).touches[0].clientY;
-      } else {
-        clientX = (e as MouseEvent).clientX;
-        clientY = (e as MouseEvent).clientY;
-      }
-
-      const target = getCellFromPoint(clientX, clientY);
-      if (target && target.dataset.index) {
-        const center = getCenter(target);
-        currentLine.setAttribute('x2', center.x.toString());
-        currentLine.setAttribute('y2', center.y.toString());
-      }
-    }
-
-    function handleUp(e: Event) {
-      if (!isDrawing || !currentLine || !startCell) return;
-      isDrawing = false;
-      
-      let clientX, clientY;
-      if (e.type === 'touchend' || e.type === 'touchcancel') {
-        clientX = (e as TouchEvent).changedTouches[0].clientX;
-        clientY = (e as TouchEvent).changedTouches[0].clientY;
-      } else {
-        clientX = (e as MouseEvent).clientX;
-        clientY = (e as MouseEvent).clientY;
-      }
-
-      const endCell = getCellFromPoint(clientX, clientY);
-      
-      if (endCell && endCell.dataset.index) {
-        const center = getCenter(endCell);
-        currentLine.setAttribute('x2', center.x.toString());
-        currentLine.setAttribute('y2', center.y.toString());
-        
-        // Verificar palabra
-        checkWord(startCell, endCell, currentLine);
-      } else {
-        svgEl.removeChild(currentLine);
-      }
-      
-      startCell = null;
-      currentLine = null;
-    }
-
-    function checkWord(start: HTMLDivElement, end: HTMLDivElement, line: SVGLineElement) {
+    function checkWord(start: HTMLDivElement, end: HTMLDivElement) {
       const r1 = parseInt(start.dataset.row!);
       const c1 = parseInt(start.dataset.col!);
       const r2 = parseInt(end.dataset.row!);
       const c2 = parseInt(end.dataset.col!);
-      
-      // Obtener las letras en la línea
+
+      // Debe ser línea recta (horizontal, vertical o diagonal)
+      if (r1 !== r2 && c1 !== c2 && Math.abs(r2 - r1) !== Math.abs(c2 - c1)) return false;
+
       const dr = Math.sign(r2 - r1);
       const dc = Math.sign(c2 - c1);
-      
-      let word = "";
-      let r = r1;
-      let c = c1;
-      
-      // Asegurarse de que están en línea recta (horizontal, vertical o diagonal)
-      if (r1 !== r2 && c1 !== c2 && Math.abs(r2 - r1) !== Math.abs(c2 - c1)) {
-        svgEl.removeChild(line);
-        return;
-      }
-
       const steps = Math.max(Math.abs(r2 - r1), Math.abs(c2 - c1));
+
+      let word = '';
       for (let i = 0; i <= steps; i++) {
-        const idx = r * 10 + c;
-        word += letters[idx];
-        r += dr;
-        c += dc;
+        word += letters[(r1 + dr*i) * 10 + (c1 + dc*i)];
       }
 
       const revWord = word.split('').reverse().join('');
-      
-      if (wordsToFind.includes(word) || wordsToFind.includes(revWord)) {
-        // Encontrado
-        const foundStr = wordsToFind.includes(word) ? word : revWord;
-        
-        // Tachar la palabra en la interfaz
-        const wordEl = document.getElementById('word-' + foundStr);
-        if (wordEl) {
-          wordEl.classList.add('line-through', 'text-gray-500', 'opacity-50');
-        }
+      const foundStr = wordsToFind.includes(word) ? word : (wordsToFind.includes(revWord) ? revWord : null);
 
+      if (foundStr) {
+        const color = colors[colorIndex % colors.length];
+        drawLine(start, end, color);
         colorIndex++;
         wordsFound++;
-        
-        // Quitar de lista para no contar doble
-        const idx1 = wordsToFind.indexOf(word);
-        const idx2 = wordsToFind.indexOf(revWord);
-        if(idx1 > -1) wordsToFind.splice(idx1, 1);
-        else if(idx2 > -1) wordsToFind.splice(idx2, 1);
+
+        const wordEl = document.getElementById('word-' + foundStr);
+        if (wordEl) wordEl.classList.add('line-through', 'text-gray-500', 'opacity-50');
+
+        const idx = wordsToFind.indexOf(foundStr);
+        if(idx > -1) wordsToFind.splice(idx, 1);
 
         if (wordsFound >= 8) {
           document.getElementById('word-msg')?.classList.remove('hidden');
         }
+        return true;
+      }
+      return false;
+    }
+
+    function handleTap(clientX: number, clientY: number) {
+      const cell = getCellFromPoint(clientX, clientY);
+      if (!cell) return;
+
+      if (!startCell) {
+        // PRIMER TOQUE: marcar inicio
+        startCell = cell;
+        cell.classList.add('bg-yellow-400/60', 'scale-110', 'rounded');
       } else {
-        svgEl.removeChild(line);
+        // SEGUNDO TOQUE: verificar palabra
+        const found = checkWord(startCell, cell);
+        
+        // Limpiar resaltado del inicio
+        startCell.classList.remove('bg-yellow-400/60', 'scale-110', 'rounded');
+        
+        if (!found) {
+          // Breve parpadeo rojo si no es válida
+          cell.classList.add('bg-red-400/60');
+          setTimeout(() => cell.classList.remove('bg-red-400/60'), 400);
+        }
+        
+        startCell = null;
       }
     }
 
-    container.addEventListener('mousedown', handleDown);
-    container.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleUp);
-    container.addEventListener('touchstart', handleDown, { passive: false });
-    container.addEventListener('touchmove', handleMove, { passive: false });
-    window.addEventListener('touchend', handleUp, { passive: false });
-    window.addEventListener('touchcancel', handleUp, { passive: false });
-    
+    // Escuchar clics (computadora) y toques (celular)
+    container.addEventListener('click', (e) => {
+      handleTap((e as MouseEvent).clientX, (e as MouseEvent).clientY);
+    });
+
+    container.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      const t = (e as TouchEvent).changedTouches[0];
+      handleTap(t.clientX, t.clientY);
+    }, { passive: false });
+
+    container.addEventListener('touchstart', (e) => {
+      e.preventDefault(); // Evitar scroll al jugar
+    }, { passive: false });
+
     // Limpieza al cerrar modal
     const originalClose = closeModal;
     btnClose.addEventListener('click', () => {
