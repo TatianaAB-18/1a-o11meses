@@ -129,12 +129,22 @@
   // --- Información del Easter Egg ---
   const easterHTML = `
     <h3 class="text-3xl font-display text-purple-400 mb-4">🤫 Secreto Oculto</h3>
-    <div class="text-lg text-gray-200 mb-6 space-y-4">
-      <p>Tengo un secreto mágico escondido en esta página solo para ti.</p>
-      <p>Para desbloquearlo, no tienes que entrar a ninguna ventana. Simplemente cierra esto y <b>teclea la palabra mágica</b> en tu teclado.</p>
-      <p class="text-sm italic text-gray-400">(Pista: Es la palabra de 5 letras que te digo todos los días). 😉</p>
+    <div class="text-base text-gray-200 mb-6 space-y-3">
+      <p>Tengo un secreto mágico escondido en esta página solo para ti. 💜</p>
+      <p class="text-sm text-gray-400 italic">(Pista: Es la palabra de 5 letras que te digo todos los días). 😉</p>
     </div>
-    <button class="px-6 py-3 bg-purple-600 text-white font-bold rounded-full hover:scale-105 transition-transform" onclick="document.getElementById('close-modal').click()">¡Cerrar y Probar!</button>
+    <div class="flex flex-col gap-3 items-center">
+      <input 
+        id="easter-input"
+        type="text"
+        placeholder="Escribe la palabra mágica..."
+        maxlength="10"
+        class="w-full max-w-xs px-4 py-3 rounded-xl bg-white/10 border border-purple-400 text-white text-center text-xl font-bold tracking-widest placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400"
+        oninput="if(window.checkEasterInput) window.checkEasterInput(this.value)"
+      />
+      <p class="text-xs text-gray-500">En celular: escribe aquí 👆</p>
+    </div>
+    <button class="mt-6 px-6 py-3 bg-purple-600 text-white font-bold rounded-full hover:scale-105 transition-transform" onclick="document.getElementById('close-modal').click()">Cerrar</button>
   `;
 
   btnEaster.addEventListener('click', () => {
@@ -550,11 +560,11 @@
   const bugsContainer = document.getElementById('bugs-container')!;
   const messages = ["Eres mi todo", "Te amo infinitamente", "Mi cielito hermoso", "Gracias por existir"];
   
-  // Aumentar la frecuencia de aparición (cada 500ms con 50% de probabilidad)
+  // Frecuencia moderada de aparición (cada 1200ms con 35% de probabilidad)
   setInterval(() => {
     if(!modal.classList.contains('hidden')) return;
     
-    if(Math.random() > 0.5) {
+    if(Math.random() > 0.65) {
       const bug = document.createElement('div');
       bug.className = "fixed text-3xl cursor-pointer pointer-events-auto hover:scale-150 transition-transform animate-float z-50";
       bug.style.left = Math.random() * 90 + 'vw';
@@ -579,6 +589,6 @@
       // Desaparecen más rápido (4 segundos) para que sea un reto
       setTimeout(() => { if(bug.parentNode) bug.remove(); }, 4000);
     }
-  }, 500);
+  }, 1200);
 
 </script>
