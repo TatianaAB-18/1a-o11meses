@@ -400,8 +400,8 @@
   // --- Juego de Snake ---
   const snakeHTML = `
     <h3 class="text-3xl font-display text-pink-400 mb-4">Snake del Amor</h3>
-    <p class="mb-4 text-sm">Usa las flechas del teclado para jugar.</p>
-    <canvas id="snake-canvas" width="400" height="400" class="bg-black/50 border-2 border-pink-500 rounded mx-auto"></canvas>
+    <p class="mb-4 text-xs md:text-sm px-2">Usa las flechas del teclado o <b>desliza tu dedo</b> sobre el cuadro para jugar.</p>
+    <canvas id="snake-canvas" width="400" height="400" class="bg-black/50 border-2 border-pink-500 rounded mx-auto max-w-[100%] h-auto max-h-[50vh] touch-none"></canvas>
     <p id="snake-score" class="text-xl font-bold mt-4">Corazones: 0</p>
   `;
 
@@ -429,6 +429,39 @@
     };
 
     document.addEventListener("keydown", keyHandler);
+
+    // Lógica para deslizar (swipe) en celulares
+    let touchStartX = 0;
+    let touchStartY = 0;
+    
+    canvas.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, {passive: false});
+
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault(); // Evita que la pantalla haga scroll al jugar
+    }, {passive: false});
+
+    canvas.addEventListener('touchend', e => {
+      let touchEndX = e.changedTouches[0].screenX;
+      let touchEndY = e.changedTouches[0].screenY;
+      
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (Math.abs(diffX) > 20) {
+          if (diffX > 0 && d !== "LEFT") d = "RIGHT";
+          else if (diffX < 0 && d !== "RIGHT") d = "LEFT";
+        }
+      } else {
+        if (Math.abs(diffY) > 20) {
+          if (diffY > 0 && d !== "UP") d = "DOWN";
+          else if (diffY < 0 && d !== "DOWN") d = "UP";
+        }
+      }
+    });
 
     function collision(head: any, array: any[]) {
       for(let i = 0; i < array.length; i++) {
