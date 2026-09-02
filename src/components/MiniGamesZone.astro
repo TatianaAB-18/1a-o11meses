@@ -528,31 +528,35 @@
   const bugsContainer = document.getElementById('bugs-container')!;
   const messages = ["Eres mi todo", "Te amo infinitamente", "Mi cielito hermoso", "Gracias por existir"];
   
+  // Aumentar la frecuencia de aparición (cada 500ms con 50% de probabilidad)
   setInterval(() => {
     if(!modal.classList.contains('hidden')) return;
     
-    if(Math.random() > 0.9) {
+    if(Math.random() > 0.5) {
       const bug = document.createElement('div');
-      bug.className = "absolute text-2xl cursor-pointer pointer-events-auto hover:scale-150 transition-transform animate-float z-20";
+      bug.className = "fixed text-3xl cursor-pointer pointer-events-auto hover:scale-150 transition-transform animate-float z-50";
       bug.style.left = Math.random() * 90 + 'vw';
       bug.style.top = Math.random() * 90 + 'vh';
       bug.innerText = "🐛";
       
-      bug.addEventListener('click', () => {
+      bug.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
         bug.innerText = "💖";
+        bug.style.transform = "scale(1.5)";
         const msg = document.createElement('div');
-        msg.className = "absolute font-display text-pink-400 text-2xl font-bold whitespace-nowrap bg-black/50 px-3 py-1 rounded shadow-lg";
+        msg.className = "fixed font-display text-pink-400 text-xl md:text-2xl font-bold whitespace-nowrap bg-black/80 px-3 py-1 rounded shadow-[0_0_15px_rgba(247,37,133,0.8)] z-[60]";
         msg.innerText = messages[Math.floor(Math.random() * messages.length)];
         msg.style.left = bug.style.left;
         msg.style.top = `calc(${bug.style.top} - 40px)`;
         bugsContainer.appendChild(msg);
         
-        setTimeout(() => { bug.remove(); msg.remove(); }, 2500);
+        setTimeout(() => { bug.remove(); msg.remove(); }, 2000);
       });
       
       bugsContainer.appendChild(bug);
-      setTimeout(() => { if(bug.parentNode) bug.remove(); }, 6000);
+      // Desaparecen más rápido (4 segundos) para que sea un reto
+      setTimeout(() => { if(bug.parentNode) bug.remove(); }, 4000);
     }
-  }, 1000);
+  }, 500);
 
 </script>
