@@ -1,0 +1,518 @@
+---
+// MiniGamesZone.astro
+---
+<section id="games" class="min-h-screen py-20 px-4 md:px-8 bg-[var(--color-love-dark)] relative overflow-hidden">
+  
+  <div class="max-w-6xl mx-auto text-center mb-12">
+    <h2 class="text-4xl md:text-5xl font-display text-[var(--color-love-blue)] drop-shadow-[0_0_10px_rgba(76,201,240,0.5)] mb-4">
+      Zona de Juegos
+    </h2>
+    <p class="text-blue-200">Divirtámonos un rato, como siempre lo hacemos.</p>
+  </div>
+
+  <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+    
+    <!-- Tarjeta Snake -->
+    <div class="glass p-6 rounded-2xl border border-[var(--color-love-blue)]/30 hover:border-[var(--color-love-blue)] transition-colors group text-center cursor-pointer flex flex-col items-center" id="btn-snake">
+      <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🐍</div>
+      <h3 class="text-xl font-bold text-white mb-2">Snake del Amor</h3>
+      <p class="text-xs text-gray-300">Come corazones para que nuestro amor siga creciendo.</p>
+    </div>
+
+    <!-- Tarjeta Sopa de Letras -->
+    <div class="glass p-6 rounded-2xl border border-yellow-500/30 hover:border-yellow-500 transition-colors group text-center cursor-pointer flex flex-col items-center" id="btn-wordsearch">
+      <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🔤</div>
+      <h3 class="text-xl font-bold text-white mb-2">Sopa de Letras</h3>
+      <p class="text-xs text-gray-300">Encuentra las palabras mágicas que nos unen.</p>
+    </div>
+
+    <!-- Tarjeta Bugs del Amor (Informativa) -->
+    <div class="glass p-6 rounded-2xl border border-[var(--color-love-pink)]/30 hover:border-[var(--color-love-pink)] transition-colors group text-center flex flex-col items-center cursor-pointer" id="btn-bugs">
+      <div class="text-5xl mb-4 animate-bounce group-hover:scale-110 transition-transform">🐛</div>
+      <h3 class="text-xl font-bold text-white mb-2">Bugs del Amor</h3>
+      <p class="text-xs text-gray-300">¿Cómo jugar? Haz clic para ver las instrucciones.</p>
+    </div>
+
+    <!-- Tarjeta Easter Egg (Informativa) -->
+    <div class="glass p-6 rounded-2xl border border-purple-500/30 hover:border-purple-500 transition-colors group text-center flex flex-col items-center cursor-pointer" id="btn-easter">
+      <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🤫</div>
+      <h3 class="text-xl font-bold text-white mb-2">Secreto Oculto</h3>
+      <p class="text-xs text-gray-300">Descubre la pista para activar la sorpresa mágica.</p>
+    </div>
+
+  </div>
+
+  <!-- Modal del Juego -->
+  <div id="game-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <button id="close-modal" class="absolute top-8 right-8 text-white text-4xl hover:text-[var(--color-love-pink)]">&times;</button>
+    <div id="game-container" class="glass w-full max-w-2xl p-8 rounded-2xl text-center max-h-[90vh] overflow-y-auto">
+      <!-- Aquí se inyectará el juego -->
+    </div>
+  </div>
+
+  <!-- Contenedor Bugs del amor flotantes -->
+  <div class="absolute inset-0 pointer-events-none" id="bugs-container"></div>
+
+</section>
+
+<script>
+  // --- Lógica del Modal ---
+  const modal = document.getElementById('game-modal')!;
+  const gameContainer = document.getElementById('game-container')!;
+  const btnSnake = document.getElementById('btn-snake')!;
+  const btnWordSearch = document.getElementById('btn-wordsearch')!;
+  const btnBugs = document.getElementById('btn-bugs')!;
+  const btnEaster = document.getElementById('btn-easter')!;
+  const btnClose = document.getElementById('close-modal')!;
+
+  let activeInterval: number | null = null; // Para limpiar Snake u otros juegos
+
+  function openModal(contentHTML: string, initFunction?: () => void) {
+    gameContainer.innerHTML = contentHTML;
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    if(initFunction) setTimeout(initFunction, 300);
+  }
+
+  function closeModal() {
+    modal.classList.add('opacity-0');
+    if(activeInterval) clearInterval(activeInterval);
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      gameContainer.innerHTML = '';
+    }, 300);
+  }
+
+  btnClose.addEventListener('click', closeModal);
+
+  // --- Juego de Sopa de Letras ---
+  const wordSearchHTML = `
+    <h3 class="text-3xl font-display text-yellow-400 mb-4">Sopa de Letras</h3>
+    <p class="mb-4 text-xs md:text-sm">
+      <span id="word-BESOS" class="mx-1 font-bold transition-all">BESOS</span> |
+      <span id="word-CONFIANZA" class="mx-1 font-bold transition-all">CONFIANZA</span> |
+      <span id="word-RISAS" class="mx-1 font-bold transition-all">RISAS</span> |
+      <span id="word-PACIENCIA" class="mx-1 font-bold transition-all">PACIENCIA</span> <br/>
+      <span id="word-MAGIA" class="mx-1 font-bold transition-all">MAGIA</span> |
+      <span id="word-ABRAZOS" class="mx-1 font-bold transition-all">ABRAZOS</span> |
+      <span id="word-FUTURO" class="mx-1 font-bold transition-all">FUTURO</span> |
+      <span id="word-AMOR" class="mx-1 font-bold transition-all">AMOR</span>
+    </p>
+    <div class="relative max-w-[300px] mx-auto select-none touch-none" id="ws-container">
+      <div id="word-grid" class="grid grid-cols-10 gap-0 bg-white/10 p-2 rounded font-mono text-lg font-bold cursor-pointer">
+      </div>
+      <svg id="ws-svg" class="absolute top-0 left-0 w-full h-full pointer-events-none" style="z-index: 10;">
+      </svg>
+    </div>
+    <p id="word-msg" class="text-xl font-bold mt-4 text-pink-400 hidden animate-bounce">¡Lo encontraste todo! Te amo ❤️</p>
+  `;
+
+  btnWordSearch.addEventListener('click', () => {
+    openModal(wordSearchHTML, initWordSearch);
+  });
+
+  // --- Información de Bugs ---
+  const bugsHTML = `
+    <h3 class="text-3xl font-display text-[var(--color-love-pink)] mb-4">🐛 Bugs del Amor</h3>
+    <div class="text-lg text-gray-200 mb-6 space-y-4">
+      <p>Este no es un juego tradicional, ¡es una <b>sorpresa constante</b>!</p>
+      <p>Mientras estés navegando por la página, pequeños bichitos (🐛) aparecerán flotando aleatoriamente por la pantalla.</p>
+      <p>¡Tienes que ser rápido! Si ves uno, hazle clic de inmediato con el ratón (o con el dedo) para aplastarlo y descubrir un mensaje de amor oculto.</p>
+    </div>
+    <button class="px-6 py-3 bg-[var(--color-love-pink)] text-white font-bold rounded-full hover:scale-105 transition-transform" onclick="document.getElementById('close-modal').click()">¡Entendido!</button>
+  `;
+
+  btnBugs.addEventListener('click', () => {
+    openModal(bugsHTML);
+  });
+
+  // --- Información del Easter Egg ---
+  const easterHTML = `
+    <h3 class="text-3xl font-display text-purple-400 mb-4">🤫 Secreto Oculto</h3>
+    <div class="text-lg text-gray-200 mb-6 space-y-4">
+      <p>Tengo un secreto mágico escondido en esta página solo para ti.</p>
+      <p>Para desbloquearlo, no tienes que entrar a ninguna ventana. Simplemente cierra esto y <b>teclea la palabra mágica</b> en tu teclado.</p>
+      <p class="text-sm italic text-gray-400">(Pista: Es la palabra de 5 letras que te digo todos los días). 😉</p>
+    </div>
+    <button class="px-6 py-3 bg-purple-600 text-white font-bold rounded-full hover:scale-105 transition-transform" onclick="document.getElementById('close-modal').click()">¡Cerrar y Probar!</button>
+  `;
+
+  btnEaster.addEventListener('click', () => {
+    openModal(easterHTML);
+  });
+
+  function initWordSearch() {
+    const gridEl = document.getElementById('word-grid')!;
+    const gridSize = 10;
+    const allWords = ['BESOS', 'CONFIANZA', 'RISAS', 'PACIENCIA', 'MAGIA', 'ABRAZOS', 'FUTURO', 'AMOR'];
+    
+    // Función para generar tablero aleatorio
+    function generateBoard() {
+      let board: string[][] = [];
+      let success = false;
+      let attempts = 0;
+      
+      while(!success && attempts < 100) {
+        attempts++;
+        board = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
+        let allPlaced = true;
+        
+        for (let word of allWords) {
+          let placed = false;
+          let wordAttempts = 0;
+          while(!placed && wordAttempts < 200) {
+            wordAttempts++;
+            // Direcciones: 0: der, 1: abajo, 2: diagonal, 3: diagonal arriba
+            const dir = Math.floor(Math.random() * 4); 
+            const reverse = Math.random() > 0.5;
+            const str = reverse ? word.split('').reverse().join('') : word;
+            
+            let dr = dir === 1 || dir === 2 ? 1 : (dir === 3 ? -1 : 0);
+            let dc = dir === 0 || dir === 2 || dir === 3 ? 1 : 0;
+            
+            const maxR = dr === 1 ? gridSize - str.length : (dr === -1 ? gridSize - 1 : gridSize - 1);
+            const minR = dr === -1 ? str.length - 1 : 0;
+            const maxC = dc === 1 ? gridSize - str.length : gridSize - 1;
+            
+            if (maxR < minR || maxC < 0) continue;
+            
+            const r = Math.floor(Math.random() * (maxR - minR + 1)) + minR;
+            const c = Math.floor(Math.random() * (maxC + 1));
+            
+            let fits = true;
+            for(let i=0; i<str.length; i++) {
+              const char = board[r + dr*i][c + dc*i];
+              if(char !== '' && char !== str[i]) {
+                fits = false; break;
+              }
+            }
+            if(fits) {
+              for(let i=0; i<str.length; i++) {
+                board[r + dr*i][c + dc*i] = str[i];
+              }
+              placed = true;
+            }
+          }
+          if(!placed) { allPlaced = false; break; }
+        }
+        if(allPlaced) success = true;
+      }
+      
+      const alphabet = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+      let flatLetters = [];
+      for(let r=0; r<gridSize; r++) {
+        for(let c=0; c<gridSize; c++) {
+          if(board[r][c] === '') {
+            board[r][c] = alphabet[Math.floor(Math.random() * alphabet.length)];
+          }
+          flatLetters.push(board[r][c]);
+        }
+      }
+      return flatLetters;
+    }
+    
+    const letters = generateBoard();
+    const wordsToFind = [...allWords];
+    let wordsFound = 0;
+    
+    const colors = ['#f7258588', '#4cc9f088', '#b5179e88', '#fca31188', '#70e00088'];
+    let colorIndex = 0;
+
+    gridEl.innerHTML = '';
+    const cells: HTMLDivElement[] = [];
+
+    // Limpiar estilos de palabras tachadas (por si vuelve a abrir)
+    allWords.forEach(w => {
+      const el = document.getElementById('word-' + w);
+      if(el) el.classList.remove('line-through', 'text-gray-500', 'opacity-50');
+    });
+
+    letters.forEach((l, i) => {
+      const div = document.createElement('div');
+      div.innerText = l;
+      div.className = "w-[28px] h-[28px] flex items-center justify-center rounded select-none";
+      div.dataset.index = i.toString();
+      div.dataset.row = Math.floor(i / 10).toString();
+      div.dataset.col = (i % 10).toString();
+      gridEl.appendChild(div);
+      cells.push(div);
+    });
+
+    let isDrawing = false;
+    let startCell: HTMLDivElement | null = null;
+    let currentLine: SVGLineElement | null = null;
+
+    function getCenter(el: HTMLElement) {
+      const rect1 = container.getBoundingClientRect();
+      const rect2 = el.getBoundingClientRect();
+      return {
+        x: rect2.left - rect1.left + rect2.width / 2,
+        y: rect2.top - rect1.top + rect2.height / 2
+      };
+    }
+
+    function handleDown(e: Event) {
+      const target = (e.type === 'touchstart' ? document.elementFromPoint((e as TouchEvent).touches[0].clientX, (e as TouchEvent).touches[0].clientY) : e.target) as HTMLDivElement;
+      if (!target || !target.dataset.index) return;
+      
+      isDrawing = true;
+      startCell = target;
+      
+      currentLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      const center = getCenter(startCell);
+      
+      currentLine.setAttribute('x1', center.x.toString());
+      currentLine.setAttribute('y1', center.y.toString());
+      currentLine.setAttribute('x2', center.x.toString());
+      currentLine.setAttribute('y2', center.y.toString());
+      currentLine.setAttribute('stroke', colors[colorIndex % colors.length]);
+      currentLine.setAttribute('stroke-width', '24');
+      currentLine.setAttribute('stroke-linecap', 'round');
+      currentLine.setAttribute('opacity', '0.8');
+      
+      svgEl.appendChild(currentLine);
+    }
+
+    function handleMove(e: Event) {
+      if (!isDrawing || !currentLine || !startCell) return;
+      e.preventDefault(); // Evitar scroll
+      
+      let clientX, clientY;
+      if (e.type === 'touchmove') {
+        clientX = (e as TouchEvent).touches[0].clientX;
+        clientY = (e as TouchEvent).touches[0].clientY;
+      } else {
+        clientX = (e as MouseEvent).clientX;
+        clientY = (e as MouseEvent).clientY;
+      }
+
+      const target = document.elementFromPoint(clientX, clientY) as HTMLDivElement;
+      if (target && target.dataset.index) {
+        const center = getCenter(target);
+        currentLine.setAttribute('x2', center.x.toString());
+        currentLine.setAttribute('y2', center.y.toString());
+      }
+    }
+
+    function handleUp(e: Event) {
+      if (!isDrawing || !currentLine || !startCell) return;
+      isDrawing = false;
+      
+      let clientX, clientY;
+      if (e.type === 'touchend') {
+        clientX = (e as TouchEvent).changedTouches[0].clientX;
+        clientY = (e as TouchEvent).changedTouches[0].clientY;
+      } else {
+        clientX = (e as MouseEvent).clientX;
+        clientY = (e as MouseEvent).clientY;
+      }
+
+      const endCell = document.elementFromPoint(clientX, clientY) as HTMLDivElement;
+      
+      if (endCell && endCell.dataset.index) {
+        const center = getCenter(endCell);
+        currentLine.setAttribute('x2', center.x.toString());
+        currentLine.setAttribute('y2', center.y.toString());
+        
+        // Verificar palabra
+        checkWord(startCell, endCell, currentLine);
+      } else {
+        svgEl.removeChild(currentLine);
+      }
+      
+      startCell = null;
+      currentLine = null;
+    }
+
+    function checkWord(start: HTMLDivElement, end: HTMLDivElement, line: SVGLineElement) {
+      const r1 = parseInt(start.dataset.row!);
+      const c1 = parseInt(start.dataset.col!);
+      const r2 = parseInt(end.dataset.row!);
+      const c2 = parseInt(end.dataset.col!);
+      
+      // Obtener las letras en la línea
+      const dr = Math.sign(r2 - r1);
+      const dc = Math.sign(c2 - c1);
+      
+      let word = "";
+      let r = r1;
+      let c = c1;
+      
+      // Asegurarse de que están en línea recta (horizontal, vertical o diagonal)
+      if (r1 !== r2 && c1 !== c2 && Math.abs(r2 - r1) !== Math.abs(c2 - c1)) {
+        svgEl.removeChild(line);
+        return;
+      }
+
+      const steps = Math.max(Math.abs(r2 - r1), Math.abs(c2 - c1));
+      for (let i = 0; i <= steps; i++) {
+        const idx = r * 10 + c;
+        word += letters[idx];
+        r += dr;
+        c += dc;
+      }
+
+      const revWord = word.split('').reverse().join('');
+      
+      if (wordsToFind.includes(word) || wordsToFind.includes(revWord)) {
+        // Encontrado
+        const foundStr = wordsToFind.includes(word) ? word : revWord;
+        
+        // Tachar la palabra en la interfaz
+        const wordEl = document.getElementById('word-' + foundStr);
+        if (wordEl) {
+          wordEl.classList.add('line-through', 'text-gray-500', 'opacity-50');
+        }
+
+        colorIndex++;
+        wordsFound++;
+        
+        // Quitar de lista para no contar doble
+        const idx1 = wordsToFind.indexOf(word);
+        const idx2 = wordsToFind.indexOf(revWord);
+        if(idx1 > -1) wordsToFind.splice(idx1, 1);
+        else if(idx2 > -1) wordsToFind.splice(idx2, 1);
+
+        if (wordsFound >= 8) {
+          document.getElementById('word-msg')?.classList.remove('hidden');
+        }
+      } else {
+        svgEl.removeChild(line);
+      }
+    }
+
+    container.addEventListener('mousedown', handleDown);
+    container.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    container.addEventListener('touchstart', handleDown, { passive: false });
+    container.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleUp);
+    
+    // Limpieza al cerrar modal
+    const originalClose = closeModal;
+    btnClose.addEventListener('click', () => {
+      window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('touchend', handleUp);
+    }, { once: true });
+  }
+
+
+  // --- Juego de Snake ---
+  const snakeHTML = `
+    <h3 class="text-3xl font-display text-pink-400 mb-4">Snake del Amor</h3>
+    <p class="mb-4 text-sm">Usa las flechas del teclado para jugar.</p>
+    <canvas id="snake-canvas" width="400" height="400" class="bg-black/50 border-2 border-pink-500 rounded mx-auto"></canvas>
+    <p id="snake-score" class="text-xl font-bold mt-4">Corazones: 0</p>
+  `;
+
+  btnSnake.addEventListener('click', () => {
+    openModal(snakeHTML, initSnake);
+  });
+
+  function initSnake() {
+    const canvas = document.getElementById('snake-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d')!;
+    const box = 20;
+    let snake: {x:number, y:number}[] = [];
+    snake[0] = { x: 9 * box, y: 10 * box };
+    
+    let food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+    let score = 0;
+    let d = "";
+
+    const keyHandler = (event: KeyboardEvent) => {
+      if(event.key === "ArrowLeft" && d !== "RIGHT") d = "LEFT";
+      else if(event.key === "ArrowUp" && d !== "DOWN") d = "UP";
+      else if(event.key === "ArrowRight" && d !== "LEFT") d = "RIGHT";
+      else if(event.key === "ArrowDown" && d !== "UP") d = "DOWN";
+    };
+
+    document.addEventListener("keydown", keyHandler);
+
+    function collision(head: any, array: any[]) {
+      for(let i = 0; i < array.length; i++) {
+        if(head.x === array[i].x && head.y === array[i].y) return true;
+      }
+      return false;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      for(let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = (i === 0) ? "#f72585" : "#b5179e";
+        ctx.beginPath();
+        ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = "red";
+      ctx.font = "20px Arial";
+      ctx.fillText("❤️", food.x, food.y + box - 2);
+
+      let snakeX = snake[0].x;
+      let snakeY = snake[0].y;
+
+      if(d === "LEFT") snakeX -= box;
+      if(d === "UP") snakeY -= box;
+      if(d === "RIGHT") snakeX += box;
+      if(d === "DOWN") snakeY += box;
+
+      if(snakeX === food.x && snakeY === food.y) {
+        score++;
+        document.getElementById('snake-score')!.innerText = "Corazones: " + score;
+        food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+      } else {
+        snake.pop();
+      }
+
+      let newHead = { x: snakeX, y: snakeY };
+
+      if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+        clearInterval(activeInterval!);
+        document.removeEventListener("keydown", keyHandler);
+        ctx.fillStyle = "white";
+        ctx.font = "30px Inter";
+        ctx.fillText("¡Te amo!", canvas.width/2 - 50, canvas.height/2);
+        return;
+      }
+
+      snake.unshift(newHead);
+    }
+
+    activeInterval = window.setInterval(draw, 150);
+  }
+
+  // --- Love Bugs ---
+  const bugsContainer = document.getElementById('bugs-container')!;
+  const messages = ["Eres mi todo", "Te amo infinitamente", "Mi cielito hermoso", "Gracias por existir"];
+  
+  setInterval(() => {
+    if(!modal.classList.contains('hidden')) return;
+    
+    if(Math.random() > 0.9) {
+      const bug = document.createElement('div');
+      bug.className = "absolute text-2xl cursor-pointer pointer-events-auto hover:scale-150 transition-transform animate-float z-20";
+      bug.style.left = Math.random() * 90 + 'vw';
+      bug.style.top = Math.random() * 90 + 'vh';
+      bug.innerText = "🐛";
+      
+      bug.addEventListener('click', () => {
+        bug.innerText = "💖";
+        const msg = document.createElement('div');
+        msg.className = "absolute font-display text-pink-400 text-2xl font-bold whitespace-nowrap bg-black/50 px-3 py-1 rounded shadow-lg";
+        msg.innerText = messages[Math.floor(Math.random() * messages.length)];
+        msg.style.left = bug.style.left;
+        msg.style.top = `calc(${bug.style.top} - 40px)`;
+        bugsContainer.appendChild(msg);
+        
+        setTimeout(() => { bug.remove(); msg.remove(); }, 2500);
+      });
+      
+      bugsContainer.appendChild(bug);
+      setTimeout(() => { if(bug.parentNode) bug.remove(); }, 6000);
+    }
+  }, 1000);
+
+</script>

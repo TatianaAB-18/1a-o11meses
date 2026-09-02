@@ -1,0 +1,89 @@
+---
+// VinylPlayer.astro
+---
+<div id="vinyl-player" class="fixed bottom-6 right-6 z-50 flex items-center gap-4 bg-black/40 backdrop-blur-md border border-white/10 p-3 rounded-full shadow-2xl transition-transform hover:scale-105 cursor-pointer">
+  
+  <div class="relative w-12 h-12 rounded-full border-2 border-gray-800 bg-black flex items-center justify-center overflow-hidden animate-[spin_4s_linear_infinite] [animation-play-state:paused]" id="vinyl-disc">
+    <!-- Centro del vinilo -->
+    <div class="w-4 h-4 bg-pink-500 rounded-full z-10 border border-black relative">
+      <div class="w-1 h-1 bg-white rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+    </div>
+    <!-- Brillos del vinilo simulados con css -->
+    <div class="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_0deg,rgba(255,255,255,0.2)_45deg,transparent_90deg,transparent_180deg,rgba(255,255,255,0.2)_225deg,transparent_270deg)]"></div>
+  </div>
+
+  <div class="pr-4">
+    <p class="text-xs text-pink-300 font-bold uppercase tracking-wider mb-1">Nuestra Playlist</p>
+    <p class="text-sm font-mono text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]" id="current-song-title">Cafuné - Micro TDH</p>
+  </div>
+  
+  <button id="next-song-btn" class="text-white hover:text-pink-400 p-2">
+    ⏭️
+  </button>
+
+  <audio id="playlist-audio" class="hidden">
+    <source src="/music/Micro%20TDH%20-%20Cafun%C3%A9.mp3" type="audio/mpeg" id="audio-source">
+  </audio>
+</div>
+
+<script>
+  const songs = [
+    { title: "Cafuné - Micro TDH", src: "/music/Micro%20TDH%20-%20Cafun%C3%A9.mp3" },
+    { title: "Ocean - KAROL G", src: "/music/KAROL%20G%20-%20Ocean.mp3" },
+    { title: "Bésame Sin Sentir - Micro TDH", src: "/music/Micro%20TDH%20-%20Besame%20Sin%20Sentir.mp3" },
+    { title: "Ojitos Lindos - Bad Bunny", src: "/music/Bad%20Bunny%20-%20Ojitos%20Lindos%20y%20Bomba%20Est%C3%A9reo.mp3" },
+    { title: "Tattoo - Rauw Alejandro", src: "/music/Rauw%20Alejandro%20-%20Tattoo.mp3" },
+    { title: "Como Te Veo - Darho", src: "/music/Darho%20-%20Como%20Te%20Veo.mp3" }
+  ];
+
+  let currentSongIndex = 0;
+  let isPlaying = false;
+
+  const audio = document.getElementById('playlist-audio') as HTMLAudioElement;
+  const titleDisplay = document.getElementById('current-song-title')!;
+  const disc = document.getElementById('vinyl-disc')!;
+  const nextBtn = document.getElementById('next-song-btn')!;
+  const playerContainer = document.getElementById('vinyl-player')!;
+
+  // Intentar reproducir al primer clic en cualquier lado si no se ha iniciado
+  document.body.addEventListener('click', () => {
+    if (!isPlaying && audio.paused) {
+      audio.volume = 0.4;
+      audio.play().then(() => {
+        isPlaying = true;
+        disc.style.animationPlayState = 'running';
+      }).catch(e => console.log("Autoplay interactivo requerido"));
+    }
+  }, { once: true });
+
+  // Play/Pause al hacer clic en el reproductor (excepto el botón next)
+  playerContainer.addEventListener('click', (e) => {
+    if(e.target === nextBtn || nextBtn.contains(e.target as Node)) return;
+    
+    if (audio.paused) {
+      audio.play();
+      disc.style.animationPlayState = 'running';
+    } else {
+      audio.pause();
+      disc.style.animationPlayState = 'paused';
+    }
+  });
+
+  // Siguiente canción
+  nextBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Evitar disparar el play/pause del contenedor
+    currentSongIndex = (currentSongIndex + 1) % songs.length;
+    
+    const nextSong = songs[currentSongIndex];
+    audio.src = nextSong.src;
+    titleDisplay.innerText = nextSong.title;
+    
+    audio.play();
+    disc.style.animationPlayState = 'running';
+  });
+
+  // Cuando termine una canción, pasar a la siguiente automáticamente
+  audio.addEventListener('ended', () => {
+    nextBtn.click();
+  });
+</script>

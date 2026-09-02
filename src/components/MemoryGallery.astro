@@ -1,0 +1,61 @@
+---
+// MemoryGallery.astro
+const memories = [
+  { img: '/images/foto1.jpg', title: 'Nuestro primer mes', desc: 'Cuando supe que eras tú...', date: 'Nov 2024' },
+  { img: '/images/foto2.jpeg', title: 'Esa sonrisa', desc: 'Me enamora cada día más', date: 'Ene 2025' },
+  { img: '/images/foto3.jpeg', title: 'Aventuras juntos', desc: 'Mi lugar favorito es contigo', date: 'Jul 2025' },
+  { img: '/images/foto4.jpeg', title: 'Hoy y siempre', desc: 'Rumbo a los 2 años...', date: 'Sep 2026' }
+];
+---
+<section id="gallery" class="min-h-screen py-20 px-4 md:px-8 bg-gradient-to-b from-[var(--color-love-dark)] to-[var(--color-love-purple)]">
+  
+  <div class="max-w-6xl mx-auto text-center mb-16">
+    <h2 class="text-4xl md:text-5xl font-display text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-white drop-shadow-md mb-4">
+      Nuestra Historia
+    </h2>
+    <p class="text-pink-200 text-lg">Cada momento a tu lado es un tesoro.</p>
+  </div>
+
+  <!-- Línea del tiempo y Polaroids -->
+  <div class="relative max-w-5xl mx-auto">
+    <!-- Línea central (oculta en móviles, visible en desktop) -->
+    <div class="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-pink-500 to-transparent opacity-30 rounded-full"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 relative">
+      {memories.map((mem, index) => (
+        <div class={`polaroid-container group perspective-1000 ${index % 2 !== 0 ? 'md:mt-32' : ''}`}>
+          
+          <!-- Punto de la línea de tiempo -->
+          <div class={`hidden md:flex absolute top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-pink-500 border-4 border-[var(--color-love-dark)] z-10 items-center justify-center shadow-[0_0_15px_rgba(247,37,133,0.8)] transition-all duration-300 group-hover:scale-125 ${index % 2 === 0 ? '-right-16 translate-x-1/2' : '-left-16 -translate-x-1/2'}`}>
+          </div>
+
+          <!-- Carta Polaroid -->
+          <div class="relative bg-white p-4 pb-16 rounded-sm shadow-xl transform transition-all duration-500 hover:scale-110 hover:-translate-y-4 hover:rotate-0 hover:z-20 cursor-pointer text-gray-800"
+               style={`transform: rotate(${Math.random() * 6 - 3}deg);`}>
+            
+            <div class="overflow-hidden rounded relative h-64 w-full bg-gray-200">
+              <img src={mem.img} alt={mem.title} class="w-full h-full object-cover" />
+              
+              <!-- Overlay con mensaje al hacer hover -->
+              <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
+                <p class="text-white text-xl font-display text-center leading-relaxed drop-shadow-md">"{mem.desc}"</p>
+              </div>
+            </div>
+            
+            <div class="absolute bottom-4 left-0 w-full text-center px-4 flex justify-between items-center">
+              <span class="font-display text-2xl font-bold">{mem.title}</span>
+              <span class="text-sm font-mono text-gray-500">{mem.date}</span>
+            </div>
+          </div>
+
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+</style>

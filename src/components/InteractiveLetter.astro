@@ -1,0 +1,87 @@
+---
+// InteractiveLetter.astro
+---
+<section id="letter" class="min-h-screen py-20 px-4 md:px-8 bg-gradient-to-b from-[var(--color-love-purple)] to-[var(--color-love-pink)] flex flex-col items-center justify-center">
+  
+  <div class="max-w-2xl w-full text-center relative">
+    
+    <!-- Sobre Cerrado -->
+    <div id="envelope" class="mx-auto w-64 h-48 bg-[#f5deb3] rounded relative shadow-2xl cursor-pointer hover:-translate-y-2 transition-transform duration-300">
+      <div class="absolute inset-0 border-t-[96px] border-t-[#d4b886] border-l-[128px] border-l-transparent border-r-[128px] border-r-transparent origin-top transition-transform duration-700 z-20" id="envelope-flap"></div>
+      <div class="absolute inset-0 border-b-[96px] border-b-[#e6cd9a] border-l-[128px] border-l-[#e6cd9a] border-r-[128px] border-r-[#e6cd9a] z-10"></div>
+      
+      <!-- Sello de corazón -->
+      <div class="absolute top-[80px] left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl z-30 drop-shadow-md transition-opacity duration-300" id="envelope-seal">
+        ❤️
+      </div>
+      
+      <p class="absolute -bottom-10 w-full text-center text-white font-bold animate-pulse">Haz clic para abrir</p>
+    </div>
+
+    <!-- Carta Abierta (Oculta por defecto) -->
+    <div id="opened-letter" class="hidden bg-[#fbf8f1] text-[#2c1810] p-8 md:p-12 rounded shadow-2xl mt-12 w-full text-left font-display text-xl md:text-2xl leading-relaxed relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] pointer-events-none"></div>
+      
+      <p id="typewriter-text" class="mb-6 min-h-[150px]"></p>
+
+      <div id="reasons-list" class="hidden opacity-0 transition-opacity duration-1000">
+        <h4 class="font-bold mb-4 font-body text-lg text-pink-600 uppercase tracking-wider">Razones por las que te amo:</h4>
+        <ol class="list-decimal pl-6 space-y-3 font-body text-base text-gray-800">
+          <li>Por la forma en que me miras y me haces sentir la persona más especial.</li>
+          <li>Por hacerme reír incluso en los días más grises.</li>
+          <li>Por apoyarme en cada locura y sueño que tengo.</li>
+          <li>Por ser mi paz, mi hogar y mi lugar seguro.</li>
+          <li>Por las muchas canciones que son de nuestra historia.</li>
+        </ol>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  const envelope = document.getElementById('envelope')!;
+  const flap = document.getElementById('envelope-flap')!;
+  const seal = document.getElementById('envelope-seal')!;
+  const openedLetter = document.getElementById('opened-letter')!;
+  const typewriterText = document.getElementById('typewriter-text')!;
+  const reasonsList = document.getElementById('reasons-list')!;
+
+  const letterContent = "Mi amor, mi cielito hermoso... No me alcanzan las palabras para describir lo feliz que me haces. Han pasado 1 año y 11 meses desde que comenzó nuestra historia, y cada día confirmo que eres lo mejor que me ha pasado. Vamos rumbo a los 2 añitos este 7 de octubre, y solo puedo soñar con todos los aniversarios que nos faltan por celebrar juntos.";
+  
+  let isOpened = false;
+
+  envelope.addEventListener('click', () => {
+    if(isOpened) return;
+    isOpened = true;
+    
+    // Animar sobre
+    seal.style.opacity = '0';
+    flap.style.transform = 'rotateX(180deg)';
+    
+    setTimeout(() => {
+      envelope.classList.add('hidden');
+      openedLetter.classList.remove('hidden');
+      
+      // Animar máquina de escribir
+      let i = 0;
+      const speed = 50; // milisegundos
+      
+      function typeWriter() {
+        if (i < letterContent.length) {
+          typewriterText.innerHTML += letterContent.charAt(i);
+          i++;
+          setTimeout(typeWriter, speed);
+        } else {
+          // Mostrar lista al final
+          reasonsList.classList.remove('hidden');
+          setTimeout(() => reasonsList.classList.remove('opacity-0'), 100);
+        }
+      }
+      
+      setTimeout(typeWriter, 500);
+      
+    }, 1000);
+  });
+</script>

@@ -1,0 +1,63 @@
+---
+// GrandFinale.astro
+---
+<section id="finale" class="min-h-screen flex flex-col items-center justify-center bg-[var(--color-love-dark)] relative px-4 text-center">
+  
+  <div class="glass p-10 rounded-3xl max-w-lg w-full relative z-10">
+    <h2 class="text-5xl font-display text-white mb-6">El Gran Final</h2>
+    
+    <button id="btn-confetti" class="px-8 py-4 mb-12 bg-white text-[var(--color-love-pink)] font-bold rounded-full shadow-[0_0_20px_rgba(255,255,255,0.5)] hover:scale-110 transition-transform text-xl">
+      🎊 ¡Celebrar nuestro amor! 🎊
+    </button>
+
+    <div class="border-t border-white/20 pt-8 mt-4">
+      <h3 class="text-2xl font-bold mb-4 text-pink-300">Cápsula del Tiempo</h3>
+      <p class="text-sm text-gray-300 mb-6">Un mensaje especial asegurado hasta nuestro 2do Aniversario (7 de Octubre).</p>
+      
+      <div class="bg-black/40 rounded p-6 relative overflow-hidden group border border-white/10">
+        <div class="text-4xl mb-2 group-hover:animate-bounce">🔒</div>
+        <p class="font-mono text-pink-500 font-bold tracking-widest">ESTADO: BLOQUEADO</p>
+        <p class="text-xs text-gray-500 mt-2">Faltan días para poder abrirla...</p>
+        
+        <!-- Efecto de candado con password -->
+        <button class="mt-4 px-4 py-2 bg-pink-900/50 rounded text-xs hover:bg-pink-800 transition" onclick="alert('Todavía no es 7 de octubre mi amor ❤️. ¡Paciencia!')">Intentar Abrir</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="mt-12 text-sm text-gray-500 font-mono">Creado con todo mi amor para ti. 💖</p>
+
+</section>
+
+<script>
+  import confetti from 'canvas-confetti';
+
+  const btnConfetti = document.getElementById('btn-confetti');
+  
+  btnConfetti?.addEventListener('click', () => {
+    var duration = 3000;
+    var end = Date.now() + duration;
+
+    (function frame() {
+      // Lanzar confeti desde los bordes
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#f72585', '#b5179e', '#4cc9f0', '#ffffff']
+      });
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#f72585', '#b5179e', '#4cc9f0', '#ffffff']
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    }());
+  });
+</script>
