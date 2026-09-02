@@ -252,7 +252,12 @@
     }
 
     function handleDown(e: Event) {
-      const target = (e.type === 'touchstart' ? document.elementFromPoint((e as TouchEvent).touches[0].clientX, (e as TouchEvent).touches[0].clientY) : e.target) as HTMLDivElement;
+      if (e.type === 'touchstart') e.preventDefault(); // Crucial para móviles, evita que el navegador intercepte el gesto
+      
+      const clientX = e.type === 'touchstart' ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
+      const clientY = e.type === 'touchstart' ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+      
+      const target = document.elementFromPoint(clientX, clientY) as HTMLDivElement;
       if (!target || !target.dataset.index) return;
       
       isDrawing = true;
@@ -299,7 +304,7 @@
       isDrawing = false;
       
       let clientX, clientY;
-      if (e.type === 'touchend') {
+      if (e.type === 'touchend' || e.type === 'touchcancel') {
         clientX = (e as TouchEvent).changedTouches[0].clientX;
         clientY = (e as TouchEvent).changedTouches[0].clientY;
       } else {
@@ -386,13 +391,15 @@
     window.addEventListener('mouseup', handleUp);
     container.addEventListener('touchstart', handleDown, { passive: false });
     container.addEventListener('touchmove', handleMove, { passive: false });
-    window.addEventListener('touchend', handleUp);
+    window.addEventListener('touchend', handleUp, { passive: false });
+    window.addEventListener('touchcancel', handleUp, { passive: false });
     
     // Limpieza al cerrar modal
     const originalClose = closeModal;
     btnClose.addEventListener('click', () => {
       window.removeEventListener('mouseup', handleUp);
       window.removeEventListener('touchend', handleUp);
+      window.removeEventListener('touchcancel', handleUp);
     }, { once: true });
   }
 

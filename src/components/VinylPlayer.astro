@@ -52,15 +52,15 @@
       audio.play().then(() => {
         isPlaying = true;
         disc.style.animationPlayState = 'running';
-      }).catch(e => console.log("Autoplay interactivo requerido por el navegador"));
+        // Remover los eventos solo cuando ya funcionó
+        document.body.removeEventListener('pointerdown', startAudio);
+        document.body.removeEventListener('touchstart', startAudio);
+      }).catch(e => console.log("Esperando interacción válida..."));
     }
-    // Remover los eventos una vez que ya inició
-    document.body.removeEventListener('pointerdown', startAudio);
-    document.body.removeEventListener('touchstart', startAudio);
   };
 
-  document.body.addEventListener('pointerdown', startAudio, { once: true });
-  document.body.addEventListener('touchstart', startAudio, { once: true });
+  document.body.addEventListener('pointerdown', startAudio);
+  document.body.addEventListener('touchstart', startAudio);
 
   // Play/Pause al hacer clic en el reproductor (excepto el botón next)
   playerContainer.addEventListener('click', (e) => {
