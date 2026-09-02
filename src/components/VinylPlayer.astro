@@ -45,16 +45,22 @@
   const nextBtn = document.getElementById('next-song-btn')!;
   const playerContainer = document.getElementById('vinyl-player')!;
 
-  // Intentar reproducir al primer clic en cualquier lado si no se ha iniciado
-  document.body.addEventListener('click', () => {
+  // Intentar reproducir al primer clic o toque en cualquier lado
+  const startAudio = () => {
     if (!isPlaying && audio.paused) {
       audio.volume = 0.4;
       audio.play().then(() => {
         isPlaying = true;
         disc.style.animationPlayState = 'running';
-      }).catch(e => console.log("Autoplay interactivo requerido"));
+      }).catch(e => console.log("Autoplay interactivo requerido por el navegador"));
     }
-  }, { once: true });
+    // Remover los eventos una vez que ya inició
+    document.body.removeEventListener('pointerdown', startAudio);
+    document.body.removeEventListener('touchstart', startAudio);
+  };
+
+  document.body.addEventListener('pointerdown', startAudio, { once: true });
+  document.body.addEventListener('touchstart', startAudio, { once: true });
 
   // Play/Pause al hacer clic en el reproductor (excepto el botón next)
   playerContainer.addEventListener('click', (e) => {
