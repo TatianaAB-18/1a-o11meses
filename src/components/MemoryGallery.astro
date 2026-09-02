@@ -36,9 +36,9 @@ const memories = [
             <div class="overflow-hidden rounded relative h-64 w-full bg-gray-200">
               <img src={mem.img} alt={mem.title} class="w-full h-full object-cover" />
               
-              <!-- Overlay con mensaje al hacer hover -->
-              <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
-                <p class="text-white text-xl font-display text-center leading-relaxed drop-shadow-md">"{mem.desc}"</p>
+              <!-- Overlay con mensaje (Siempre visible abajo en móviles, hover al centro en PC) -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent md:bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end md:justify-center items-center p-4 pb-6 md:pb-4">
+                <p class="text-white text-lg md:text-xl font-display text-center leading-relaxed drop-shadow-md">"{mem.desc}"</p>
               </div>
             </div>
             
