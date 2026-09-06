@@ -7,7 +7,13 @@
     <h2 class="text-4xl md:text-5xl font-display text-[var(--color-love-blue)] drop-shadow-[0_0_10px_rgba(76,201,240,0.5)] mb-4">
       Zona de Juegos
     </h2>
-    <p class="text-blue-200">Divirtámonos un rato, como siempre lo hacemos.</p>
+    <p class="text-blue-200 mb-3">Divirtámonos un rato, como siempre lo hacemos.</p>
+    <p class="hidden md:inline-flex items-center gap-2 bg-blue-500/10 border border-blue-400/30 text-blue-300 text-sm px-4 py-2 rounded-full">
+      💻 <span>Para mejor experiencia, entra desde una computadora</span>
+    </p>
+    <p class="md:hidden inline-flex items-center gap-2 bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs px-4 py-2 rounded-full">
+      📱 <span>Juega tocando la pantalla con el dedo</span>
+    </p>
   </div>
 
   <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
@@ -37,15 +43,15 @@
     <div class="glass p-6 rounded-2xl border border-purple-500/30 hover:border-purple-500 transition-colors group text-center flex flex-col items-center cursor-pointer" id="btn-easter">
       <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🤫</div>
       <h3 class="text-xl font-bold text-white mb-2">Secreto Oculto</h3>
-      <p class="text-xs text-gray-300">Descubre la pista para activar la sorpresa mágica.</p>
+      <p class="text-xs text-gray-300">Descubre la palabra secreta para activar la sorpresa mágica.</p>
     </div>
 
   </div>
 
   <!-- Modal del Juego -->
-  <div id="game-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-    <button id="close-modal" class="absolute top-8 right-8 text-white text-4xl hover:text-[var(--color-love-pink)]">&times;</button>
-    <div id="game-container" class="glass w-full max-w-2xl p-8 rounded-2xl text-center max-h-[90vh] overflow-y-auto">
+  <div id="game-modal" class="fixed inset-0 bg-black/90 z-50 opacity-0 transition-opacity duration-300" style="display:none; align-items:center; justify-content:center; padding:1rem;">
+    <button id="close-modal" class="absolute top-8 right-8 text-white text-4xl hover:text-[var(--color-love-pink)] z-10">&#x00D7;</button>
+    <div id="game-container" class="glass w-full max-w-2xl p-6 md:p-8 rounded-2xl text-center max-h-[90vh] overflow-y-auto mx-auto">
       <!-- Aquí se inyectará el juego -->
     </div>
   </div>
@@ -69,7 +75,7 @@
 
   function openModal(contentHTML: string, initFunction?: () => void) {
     gameContainer.innerHTML = contentHTML;
-    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
     setTimeout(() => modal.classList.remove('opacity-0'), 10);
     if(initFunction) setTimeout(initFunction, 300);
   }
@@ -78,7 +84,7 @@
     modal.classList.add('opacity-0');
     if(activeInterval) clearInterval(activeInterval);
     setTimeout(() => {
-      modal.classList.add('hidden');
+      modal.style.display = 'none';
       gameContainer.innerHTML = '';
     }, 300);
   }
@@ -138,7 +144,6 @@
     <h3 class="text-3xl font-display text-purple-400 mb-4">🤫 Secreto Oculto</h3>
     <div class="text-base text-gray-200 mb-6 space-y-3">
       <p>Tengo un secreto mágico escondido en esta página solo para ti. 💜</p>
-      <p class="text-sm text-gray-400 italic">(Pista: Es la palabra de 5 letras que te digo todos los días). 😉</p>
     </div>
     <div class="flex flex-col gap-3 items-center">
       <input 
