@@ -124,19 +124,24 @@
       if(launched >= 5) clearInterval(launcher);
     }, 120);
 
-    // Animación con física
+    // Animación con física (basada en tiempo para igualar velocidad en PC y Celular)
     let animId: number;
-    function animate() {
+    let lastTime = performance.now();
+    
+    function animate(currentTime: number) {
+      const dt = (currentTime - lastTime) / (1000 / 60); // Ajustado para ~60fps base
+      lastTime = currentTime;
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let alive = false;
       for(const p of pieces) {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.1; // gravedad moderada
-        p.vx *= 0.99; // fricción aire
-        p.rotation += p.rotSpeed;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 0.1 * dt; // gravedad moderada
+        p.vx *= Math.pow(0.99, dt); // fricción aire
+        p.rotation += p.rotSpeed * dt;
         // Desvanecer al llegar al fondo
-        if(p.y > canvas.height * 0.75) p.alpha -= 0.025;
+        if(p.y > canvas.height * 0.75) p.alpha -= 0.025 * dt;
         if(p.alpha <= 0) continue;
         alive = true;
         ctx.save();
@@ -155,7 +160,7 @@
         canvas.remove();
       }
     }
-    animate();
+    animId = requestAnimationFrame(animate);
   }
 
   envelope.addEventListener('click', () => {
@@ -175,7 +180,7 @@
       
       // Animar máquina de escribir
       let i = 0;
-      const speed = 30; // milisegundos — velocidad moderada de lectura
+      const speed = 22; // milisegundos — velocidad moderada balanceada
       
       function typeWriter() {
         if (i < letterContent.length) {

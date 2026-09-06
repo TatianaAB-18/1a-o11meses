@@ -25,16 +25,30 @@ const { title } = Astro.props;
 	</head>
 	<body class="bg-[var(--color-love-dark)] text-white font-body selection:bg-[var(--color-love-pink)] selection:text-white">
 		
-		<!-- Stickers de Spiderman (Fondo decorativo estilo pegatina) -->
-		<div class="fixed inset-0 pointer-events-none z-[0] overflow-hidden opacity-30 md:opacity-50">
-			<div class="absolute top-[-20px] left-[-20px] text-7xl bg-white rounded-full border-[6px] border-white drop-shadow-xl transform -rotate-12">🕸️</div>
-			<div class="absolute top-[15%] right-[5%] text-5xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform rotate-12">🕷️</div>
-			<div class="absolute top-[40%] left-[8%] text-4xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform -rotate-12">❤️</div>
-			<div class="absolute bottom-[30%] right-[8%] text-6xl bg-white rounded-full border-[5px] border-white drop-shadow-xl transform -rotate-15">🦸‍♂️</div>
-			<div class="absolute bottom-[-10px] left-[40%] text-6xl bg-white rounded-full border-[5px] border-white drop-shadow-xl transform rotate-6">🕸️</div>
-			<div class="absolute bottom-[10%] left-[10%] text-5xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform rotate-12">🕷️</div>
-			<div class="absolute top-[20%] left-[40%] text-3xl bg-white rounded-full border-[3px] border-white drop-shadow-xl transform rotate-45">❤️</div>
-			<div class="absolute top-[60%] right-[15%] text-4xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform rotate-6">❤️</div>
+		<!-- Stickers de Spiderman — fixed + z-[20] para aparecer en todas las secciones -->
+		<div class="fixed inset-0 pointer-events-none z-[20] overflow-hidden opacity-20 md:opacity-35">
+			<!-- Esquina superior izquierda -->
+			<div class="absolute top-[-10px] left-[-10px] text-6xl bg-white rounded-full border-[5px] border-white drop-shadow-xl transform -rotate-12">🕸️</div>
+			<!-- Arriba derecha -->
+			<div class="absolute top-[5%] right-[4%] text-5xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform rotate-12">🕷️</div>
+			<!-- Centro izquierda -->
+			<div class="absolute top-[35%] left-[2%] text-4xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform -rotate-12">❤️</div>
+			<!-- Centro derecha -->
+			<div class="absolute top-[45%] right-[3%] text-5xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform rotate-6">🦸‍♂️</div>
+			<!-- Centro pantalla arriba -->
+			<div class="absolute top-[18%] left-[45%] text-3xl bg-white rounded-full border-[3px] border-white drop-shadow-xl transform rotate-12">🕸️</div>
+			<!-- Centro pantalla medio -->
+			<div class="absolute top-[55%] left-[48%] text-3xl bg-white rounded-full border-[3px] border-white drop-shadow-xl transform -rotate-6">🕷️</div>
+			<!-- Abajo izquierda -->
+			<div class="absolute bottom-[8%] left-[6%] text-5xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform rotate-12">🕷️</div>
+			<!-- Abajo centro -->
+			<div class="absolute bottom-[3%] left-[38%] text-5xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform rotate-6">🕸️</div>
+			<!-- Abajo derecha -->
+			<div class="absolute bottom-[20%] right-[6%] text-4xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform -rotate-12">❤️</div>
+			<!-- Extra dispersos -->
+			<div class="absolute top-[70%] left-[15%] text-3xl bg-white rounded-full border-[3px] border-white drop-shadow-xl transform rotate-45">❤️</div>
+			<div class="absolute top-[80%] right-[20%] text-4xl bg-white rounded-full border-[4px] border-white drop-shadow-xl transform -rotate-6">🦸‍♂️</div>
+			<div class="absolute top-[25%] right-[25%] text-3xl bg-white rounded-full border-[3px] border-white drop-shadow-xl transform rotate-20">❤️</div>
 		</div>
 
 		<div class="relative z-10">
