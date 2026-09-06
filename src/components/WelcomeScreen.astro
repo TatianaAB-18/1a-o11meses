@@ -75,10 +75,24 @@
   setInterval(updateCounter, 1000);
   updateCounter();
 
-  // Scroll a la siguiente sección
+  // Scroll a la siguiente sección y mostrar contenido
   document.getElementById('enter-btn')?.addEventListener('click', () => {
-    // Aquí luego agregaremos la lógica para hacer scroll a la galería
-    window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+    const hiddenContent = document.getElementById('hidden-content');
+    if (hiddenContent) {
+      // Mostrar el contenedor quitando la clase hidden
+      hiddenContent.classList.remove('hidden');
+      // Forzar un reflow para que la transición de opacidad funcione
+      void hiddenContent.offsetWidth;
+      // Quitar opacidad para que aparezca suavemente
+      hiddenContent.classList.remove('opacity-0');
+      
+      // Hacer scroll suave hacia el contenido que acaba de aparecer
+      setTimeout(() => {
+        hiddenContent.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    } else {
+      window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+    }
   });
 </script>
 
