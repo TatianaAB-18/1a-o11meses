@@ -266,6 +266,7 @@
     <h3 class="text-3xl font-display text-purple-400 mb-4">🤫 Secreto Oculto</h3>
     <div class="text-base text-gray-200 mb-6 space-y-3">
       <p>Tengo un secreto mágico escondido en esta página solo para ti. 💜</p>
+      <p class="text-sm text-purple-300">Escribe la palabra correcta y descubrirás algo especial...</p>
     </div>
     <div class="flex flex-col gap-3 items-center">
       <input 
@@ -273,17 +274,108 @@
         type="text"
         placeholder="Escribe la palabra mágica..."
         maxlength="10"
+        autocomplete="off"
         class="w-full max-w-xs px-4 py-3 rounded-xl bg-white/10 border border-purple-400 text-white text-center text-xl font-bold tracking-widest placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400"
-        oninput="if(window.checkEasterInput) window.checkEasterInput(this.value)"
       />
       <p class="text-xs text-gray-500">En celular: escribe aquí 👆</p>
+      <p id="easter-hint" class="text-xs text-purple-400 h-4"></p>
+    </div>
+    <canvas id="easter-canvas" class="absolute inset-0 pointer-events-none rounded-2xl" style="display:none;"></canvas>
+    <div id="easter-msg" class="hidden mt-6 text-center animate-bounce">
+      <p class="text-4xl mb-2">🎆✨🎇</p>
+      <p class="text-2xl font-display text-purple-300 font-bold">¡Lo encontraste!</p>
+      <p class="text-base text-white mt-2">Gracias por ser mi persona favorita en todo el universo.<br>Eres mi mejor decisión. Te amo con todo. 💜</p>
     </div>
     <button class="mt-6 px-6 py-3 bg-purple-600 text-white font-bold rounded-full hover:scale-105 transition-transform" onclick="document.getElementById('close-modal').click()">Cerrar</button>
   `;
 
   btnEaster.addEventListener('click', () => {
-    openModal(easterHTML);
+    openModal(easterHTML, initEasterEgg);
   });
+
+  function initEasterEgg() {
+    const input = document.getElementById('easter-input') as HTMLInputElement;
+    const hint = document.getElementById('easter-hint')!;
+    const msg = document.getElementById('easter-msg')!;
+    const canvas = document.getElementById('easter-canvas') as HTMLCanvasElement;
+    const SECRET = 'TEAMO';
+    let fireworksInterval: number | null = null;
+
+    function launchFireworks() {
+      const container = document.getElementById('game-container')!;
+      canvas.width = container.offsetWidth;
+      canvas.height = container.offsetHeight;
+      canvas.style.display = 'block';
+      const ctx = canvas.getContext('2d')!;
+
+      type Particle = { x:number; y:number; vx:number; vy:number; alpha:number; color:string; size:number };
+      let particles: Particle[] = [];
+
+      function burst(x: number, y: number) {
+        const colors = ['#f72585','#b5179e','#7209b7','#4cc9f0','#fca311','#ffffff'];
+        for(let i = 0; i < 60; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 4 + 1;
+          particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: Math.random() * 4 + 2
+          });
+        }
+      }
+
+      let burstCount = 0;
+      fireworksInterval = window.setInterval(() => {
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        particles = particles.filter(p => p.alpha > 0.01);
+        particles.forEach(p => {
+          p.x += p.vx; p.y += p.vy;
+          p.vy += 0.05;
+          p.alpha -= 0.018;
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        if(burstCount < 8) {
+          if(Math.random() > 0.6) {
+            burst(Math.random() * canvas.width, Math.random() * canvas.height * 0.7);
+            burstCount++;
+          }
+        } else if(particles.length === 0) {
+          clearInterval(fireworksInterval!);
+        }
+      }, 30);
+    }
+
+    if(input) {
+      input.addEventListener('input', () => {
+        const val = input.value.toUpperCase().replace(/\s/g, '');
+        hint.innerText = '';
+        if(SECRET.startsWith(val) && val.length > 0 && val.length < SECRET.length) {
+          hint.innerText = '¡Vas bien! 🔮';
+          hint.className = 'text-xs text-purple-400 h-4';
+        }
+        if(val === SECRET) {
+          input.disabled = true;
+          hint.innerText = '';
+          msg.classList.remove('hidden');
+          launchFireworks();
+        } else if(val.length >= SECRET.length) {
+          hint.innerText = 'Esa no es... inténtalo de nuevo 💜';
+          hint.className = 'text-xs text-red-400 h-4';
+          setTimeout(() => { input.value = ''; hint.innerText = ''; }, 1200);
+        }
+      });
+      input.focus();
+    }
+  }
 
   function initWordSearch() {
     const gridEl = document.getElementById('word-grid') as HTMLDivElement;
@@ -496,22 +588,32 @@
     
     let flipped: HTMLDivElement[] = [];
     let matched = 0;
+    let locked = false; // evita clics durante la comparación
     
-    icons.forEach((icon, i) => {
+    icons.forEach((icon) => {
       const card = document.createElement('div');
       card.className = "w-14 h-14 md:w-20 md:h-20 bg-white/10 rounded flex items-center justify-center text-3xl cursor-pointer border border-teal-500/30 transition-all duration-300";
       card.dataset.icon = icon;
+      card.dataset.flipped = 'false';
+      card.dataset.matched = 'false';
       card.onclick = () => {
-        if(flipped.length === 2 || card.classList.contains('bg-teal-500/30') || card.innerHTML) return;
+        // Ignorar si: están bloqueadas, ya está volteada, o ya está emparejada
+        if(locked || card.dataset.flipped === 'true' || card.dataset.matched === 'true') return;
+        if(flipped.length >= 2) return;
+        
         card.innerHTML = icon;
         card.classList.add('bg-teal-500/30');
+        card.dataset.flipped = 'true';
         flipped.push(card);
         
         if(flipped.length === 2) {
+          locked = true;
           setTimeout(() => {
             if(flipped[0].dataset.icon === flipped[1].dataset.icon) {
               flipped[0].classList.add('border-teal-400');
               flipped[1].classList.add('border-teal-400');
+              flipped[0].dataset.matched = 'true';
+              flipped[1].dataset.matched = 'true';
               matched += 2;
               if(matched === icons.length) msg.style.display = 'block';
             } else {
@@ -519,8 +621,11 @@
               flipped[1].innerHTML = '';
               flipped[0].classList.remove('bg-teal-500/30');
               flipped[1].classList.remove('bg-teal-500/30');
+              flipped[0].dataset.flipped = 'false';
+              flipped[1].dataset.flipped = 'false';
             }
             flipped = [];
+            locked = false;
           }, 800);
         }
       };
@@ -610,13 +715,30 @@
     
     function botMove() {
       if(!gameActive) return;
-      let empty = board.map((v, i) => v === '' ? i : -1).filter(v => v !== -1);
-      if(empty.length === 0) return;
-      // Bot elige al azar
-      const move = empty[Math.floor(Math.random() * empty.length)];
-      board[move] = '💻';
-      render();
-      checkState();
+      const BOT = '💻', PLAYER = '❤️';
+      const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+      
+      // 1) ¿puede ganar?
+      for(const [a,b,c] of lines) {
+        if(board[a]===BOT && board[b]===BOT && board[c]==='') { board[c]=BOT; render(); checkState(); return; }
+        if(board[a]===BOT && board[c]===BOT && board[b]==='') { board[b]=BOT; render(); checkState(); return; }
+        if(board[b]===BOT && board[c]===BOT && board[a]==='') { board[a]=BOT; render(); checkState(); return; }
+      }
+      // 2) ¿debe bloquear?
+      for(const [a,b,c] of lines) {
+        if(board[a]===PLAYER && board[b]===PLAYER && board[c]==='') { board[c]=BOT; render(); checkState(); return; }
+        if(board[a]===PLAYER && board[c]===PLAYER && board[b]==='') { board[b]=BOT; render(); checkState(); return; }
+        if(board[b]===PLAYER && board[c]===PLAYER && board[a]==='') { board[a]=BOT; render(); checkState(); return; }
+      }
+      // 3) Centro
+      if(board[4]==='') { board[4]=BOT; render(); checkState(); return; }
+      // 4) Esquina
+      for(const corner of [0,2,6,8]) {
+        if(board[corner]==='') { board[corner]=BOT; render(); checkState(); return; }
+      }
+      // 5) Cualquier libre
+      let empty = board.map((v,i) => v==='' ? i : -1).filter(v => v!==-1);
+      if(empty.length>0) { board[empty[0]]=BOT; render(); checkState(); }
     }
     
     function checkState() {
