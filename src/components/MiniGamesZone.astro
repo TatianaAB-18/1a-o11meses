@@ -308,8 +308,7 @@
       canvas.style.display = 'block';
       const ctx = canvas.getContext('2d')!;
 
-      type Particle = { x:number; y:number; vx:number; vy:number; alpha:number; color:string; size:number };
-      let particles: Particle[] = [];
+      let particles: {x:number; y:number; vx:number; vy:number; alpha:number; color:string; size:number}[] = [];
 
       function burst(x: number, y: number) {
         const colors = ['#f72585','#b5179e','#7209b7','#4cc9f0','#fca311','#ffffff'];
@@ -356,7 +355,7 @@
 
     if(input) {
       input.addEventListener('input', () => {
-        const val = input.value.toUpperCase().replace(/\s/g, '');
+        const val = input.value.toUpperCase().split(' ').join('');
         hint.innerText = '';
         if(SECRET.startsWith(val) && val.length > 0 && val.length < SECRET.length) {
           hint.innerText = '¡Vas bien! 🔮';
@@ -668,13 +667,13 @@
       
       const entry = document.createElement('div');
       entry.className = "flex justify-between items-center border-b border-indigo-500/20 pb-1";
-      entry.innerHTML = \`<span class="tracking-widest font-mono">\${val}</span> <span class="\${fijas===3 ? 'text-green-400' : 'text-indigo-300'}">Fijas: \${fijas}, Picas: \${picas}</span>\`;
+      entry.innerHTML = '<span class="tracking-widest font-mono">' + val + '</span> <span class="' + (fijas===3 ? 'text-green-400' : 'text-indigo-300') + '">Fijas: ' + fijas + ', Picas: ' + picas + '</span>';
       history.prepend(entry);
       input.value = '';
       input.focus();
       
       if(fijas === 3) {
-        entry.innerHTML = \`<span class="tracking-widest font-mono text-green-400">\${val}</span> <span class="text-green-400 font-bold">¡ACCESO CONCEDIDO! ❤️</span>\`;
+        entry.innerHTML = '<span class="tracking-widest font-mono text-green-400">' + val + '</span> <span class="text-green-400 font-bold">¡ACCESO CONCEDIDO! ❤️</span>';
         input.disabled = true;
         btn.disabled = true;
       }
