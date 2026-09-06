@@ -67,6 +67,12 @@ const { title } = Astro.props;
 		</div>
 
 		<script>
+			// Forzar que siempre cargue en la parte superior (la bienvenida)
+			if ('scrollRestoration' in history) {
+				history.scrollRestoration = 'manual';
+			}
+			window.scrollTo(0, 0);
+
 			// Easter Egg Global
 			const pass = "teamo";
 			let secretCode = "";
