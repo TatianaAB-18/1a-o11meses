@@ -5,14 +5,48 @@
   
   <div class="max-w-2xl w-full text-center relative">
     
-    <!-- Sobre Cerrado -->
-    <div id="envelope" class="mx-auto w-64 h-48 bg-[#f5deb3] rounded relative shadow-2xl cursor-pointer hover:-translate-y-2 transition-transform duration-300">
-      <div class="absolute inset-0 border-t-[96px] border-t-[#d4b886] border-l-[128px] border-l-transparent border-r-[128px] border-r-transparent origin-top transition-transform duration-700 z-20" id="envelope-flap"></div>
-      <div class="absolute inset-0 border-b-[96px] border-b-[#e6cd9a] border-l-[128px] border-l-[#e6cd9a] border-r-[128px] border-r-[#e6cd9a] z-10"></div>
+    <!-- Sobre Cerrado (Estilo Spiderman) -->
+    <div id="envelope" class="mx-auto w-64 h-48 rounded-lg relative shadow-2xl cursor-pointer hover:-translate-y-2 transition-transform duration-300">
       
-      <!-- Sello de corazón -->
-      <div class="absolute top-[80px] left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl z-30 drop-shadow-md transition-opacity duration-300" id="envelope-seal">
-        ❤️
+      <!-- Fondo interior -->
+      <div class="absolute inset-0 bg-gray-200 border-2 border-black rounded-lg"></div>
+
+      <!-- Solapas inferiores -->
+      <div class="absolute inset-0 z-10 pointer-events-none">
+        <svg class="w-full h-full" viewBox="0 0 256 192" preserveAspectRatio="none">
+          <path d="M0,0 L128,110 L256,0 L256,192 L0,192 Z" fill="white" stroke="black" stroke-width="3" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <!-- Decoraciones Spiderman -->
+      <div class="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-b-lg">
+        <div class="absolute top-20 left-4 text-4xl -rotate-12 drop-shadow-md">🕷️</div>
+        <div class="absolute top-16 right-6 text-3xl rotate-12 drop-shadow-md">❤️</div>
+        <div class="absolute bottom-4 right-8 text-4xl -rotate-12 transform scale-x-[-1] drop-shadow-md">🦸‍♂️</div>
+        <div class="absolute bottom-6 left-12 text-2xl -rotate-12 drop-shadow-md">❤️</div>
+        
+        <div class="absolute top-[110px] left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+           <svg width="70" height="70" viewBox="0 0 100 100">
+              <path d="M50,5 L95,50 L50,95 L5,50 Z" fill="none" stroke="black" stroke-width="2"/>
+              <path d="M25,25 L75,75 M25,75 L75,25 M50,5 L50,95 M5,50 L95,50" stroke="black" stroke-width="1.5"/>
+              <circle cx="50" cy="50" r="15" fill="none" stroke="black" stroke-width="1.5"/>
+              <circle cx="50" cy="50" r="30" fill="none" stroke="black" stroke-width="1.5"/>
+           </svg>
+           <div class="absolute text-xl">❤️</div>
+        </div>
+      </div>
+
+      <!-- Solapa superior -->
+      <div id="envelope-flap" class="absolute top-0 left-0 w-full h-[110px] origin-top transition-transform duration-700 z-30">
+        <svg class="w-full h-full" viewBox="0 0 256 110" preserveAspectRatio="none">
+          <path d="M0,0 L128,110 L256,0 Z" fill="white" stroke="black" stroke-width="3" stroke-linejoin="round"/>
+        </svg>
+        <div class="absolute top-4 left-1/2 -translate-x-1/2 text-2xl">🕸️</div>
+      </div>
+      
+      <!-- Sello central -->
+      <div class="absolute top-[110px] left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl z-40 drop-shadow-md transition-opacity duration-300" id="envelope-seal">
+        🕷️
       </div>
       
       <p class="absolute -bottom-10 w-full text-center text-white font-bold animate-pulse">Haz clic para abrir</p>
