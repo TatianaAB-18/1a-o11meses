@@ -48,6 +48,27 @@
       <p class="text-xs text-gray-300">Descubre la palabra secreta para activar la sorpresa mágica.</p>
     </div>
 
+    <!-- Tarjeta Memoria en Caché -->
+    <div class="glass p-6 rounded-2xl border border-teal-500/30 hover:border-teal-500 transition-colors group text-center flex flex-col items-center cursor-pointer" id="btn-memory">
+      <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🗃️</div>
+      <h3 class="text-xl font-bold text-white mb-2">Memoria en Caché</h3>
+      <p class="text-xs text-gray-300">Limpia la memoria encontrando los pares coincidentes.</p>
+    </div>
+
+    <!-- Tarjeta Hackeando tu Corazón -->
+    <div class="glass p-6 rounded-2xl border border-indigo-500/30 hover:border-indigo-500 transition-colors group text-center flex flex-col items-center cursor-pointer" id="btn-mastermind">
+      <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">👩‍💻</div>
+      <h3 class="text-xl font-bold text-white mb-2">Hackeando tu Corazón</h3>
+      <p class="text-xs text-gray-300">Adivina el código secreto usando pistas del sistema.</p>
+    </div>
+
+    <!-- Tarjeta Algoritmo Tres en Raya -->
+    <div class="glass p-6 rounded-2xl border border-orange-500/30 hover:border-orange-500 transition-colors group text-center flex flex-col items-center cursor-pointer" id="btn-tictactoe">
+      <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">❌⭕</div>
+      <h3 class="text-xl font-bold text-white mb-2">Algoritmo 3 en Raya</h3>
+      <p class="text-xs text-gray-300">Enfréntate al AmorBot en una partida clásica.</p>
+    </div>
+
   </div>
 
   <!-- Modal del Juego -->
@@ -72,6 +93,9 @@
   const btnHangman = document.getElementById('btn-hangman')!;
   const btnBugs = document.getElementById('btn-bugs')!;
   const btnEaster = document.getElementById('btn-easter')!;
+  const btnMemory = document.getElementById('btn-memory')!;
+  const btnMastermind = document.getElementById('btn-mastermind')!;
+  const btnTicTacToe = document.getElementById('btn-tictactoe')!;
   const btnClose = document.getElementById('close-modal')!;
 
   let activeInterval: number | null = null; // Para limpiar Snake u otros juegos
@@ -453,6 +477,185 @@
     // Limpieza al cerrar
 
   } // fin initWordSearch
+
+  // --- Memoria en Caché ---
+  const memoryHTML = `
+    <h3 class="text-3xl font-display text-teal-400 mb-2">Memoria en Caché</h3>
+    <p class="mb-4 text-xs text-teal-200">Encuentra todos los pares para limpiar la caché de mi corazón.</p>
+    <div id="memory-grid" class="grid grid-cols-4 gap-2 md:gap-4 max-w-sm mx-auto mb-4"></div>
+    <p id="memory-msg" class="text-xl font-bold text-teal-400 hidden animate-bounce">¡Caché limpiada con éxito! ❤️</p>
+  `;
+  btnMemory.addEventListener('click', () => {
+    openModal(memoryHTML, initMemory);
+  });
+  function initMemory() {
+    const grid = document.getElementById('memory-grid')!;
+    const msg = document.getElementById('memory-msg')!;
+    const icons = ['💻', '🐛', '☕', '❤️', '🚀', '🔒', '💻', '🐛', '☕', '❤️', '🚀', '🔒'];
+    icons.sort(() => Math.random() - 0.5);
+    
+    let flipped: HTMLDivElement[] = [];
+    let matched = 0;
+    
+    icons.forEach((icon, i) => {
+      const card = document.createElement('div');
+      card.className = "w-14 h-14 md:w-20 md:h-20 bg-white/10 rounded flex items-center justify-center text-3xl cursor-pointer border border-teal-500/30 transition-all duration-300";
+      card.dataset.icon = icon;
+      card.onclick = () => {
+        if(flipped.length === 2 || card.classList.contains('bg-teal-500/30') || card.innerHTML) return;
+        card.innerHTML = icon;
+        card.classList.add('bg-teal-500/30');
+        flipped.push(card);
+        
+        if(flipped.length === 2) {
+          setTimeout(() => {
+            if(flipped[0].dataset.icon === flipped[1].dataset.icon) {
+              flipped[0].classList.add('border-teal-400');
+              flipped[1].classList.add('border-teal-400');
+              matched += 2;
+              if(matched === icons.length) msg.style.display = 'block';
+            } else {
+              flipped[0].innerHTML = '';
+              flipped[1].innerHTML = '';
+              flipped[0].classList.remove('bg-teal-500/30');
+              flipped[1].classList.remove('bg-teal-500/30');
+            }
+            flipped = [];
+          }, 800);
+        }
+      };
+      grid.appendChild(card);
+    });
+  }
+
+  // --- Hackeando tu Corazón ---
+  const mastermindHTML = `
+    <h3 class="text-3xl font-display text-indigo-400 mb-2">Hackeando tu Corazón</h3>
+    <p class="mb-4 text-xs text-indigo-200">Adivina el PIN de 3 dígitos (del 0 al 9, no se repiten).</p>
+    <div class="flex gap-2 justify-center mb-4">
+      <input type="number" id="mm-input" class="w-24 px-2 py-2 bg-black/50 border border-indigo-500 text-white text-center text-xl tracking-widest rounded" max="999" placeholder="000"/>
+      <button id="mm-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded transition-colors">Hackear</button>
+    </div>
+    <div id="mm-history" class="space-y-2 text-sm max-h-40 overflow-y-auto w-full max-w-xs mx-auto border border-indigo-500/30 p-2 rounded bg-black/30"></div>
+  `;
+  btnMastermind.addEventListener('click', () => {
+    openModal(mastermindHTML, initMastermind);
+  });
+  function initMastermind() {
+    const input = document.getElementById('mm-input') as HTMLInputElement;
+    const btn = document.getElementById('mm-btn')!;
+    const history = document.getElementById('mm-history')!;
+    
+    // Generar código de 3 dígitos sin repetir
+    let nums = [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random() - 0.5).slice(0,3);
+    const code = nums.join('');
+    
+    btn.onclick = () => {
+      const val = input.value;
+      if(val.length !== 3) return alert("Ingresa exactamente 3 dígitos.");
+      
+      let picas = 0; // correcto, mal lugar
+      let fijas = 0; // correcto, buen lugar
+      for(let i=0; i<3; i++) {
+        if(val[i] === code[i]) fijas++;
+        else if(code.includes(val[i])) picas++;
+      }
+      
+      const entry = document.createElement('div');
+      entry.className = "flex justify-between items-center border-b border-indigo-500/20 pb-1";
+      entry.innerHTML = \`<span class="tracking-widest font-mono">\${val}</span> <span class="\${fijas===3 ? 'text-green-400' : 'text-indigo-300'}">Fijas: \${fijas}, Picas: \${picas}</span>\`;
+      history.prepend(entry);
+      input.value = '';
+      input.focus();
+      
+      if(fijas === 3) {
+        entry.innerHTML = \`<span class="tracking-widest font-mono text-green-400">\${val}</span> <span class="text-green-400 font-bold">¡ACCESO CONCEDIDO! ❤️</span>\`;
+        input.disabled = true;
+        btn.disabled = true;
+      }
+    };
+  }
+
+  // --- Algoritmo Tres en Raya ---
+  const tttHTML = `
+    <h3 class="text-3xl font-display text-orange-400 mb-2">Algoritmo 3 en Raya</h3>
+    <p class="mb-4 text-xs text-orange-200">Tú eres ❤️, AmorBot es 💻.</p>
+    <div id="ttt-grid" class="grid grid-cols-3 gap-2 w-[200px] h-[200px] mx-auto mb-4 bg-orange-500/30 p-2 rounded-lg"></div>
+    <p id="ttt-msg" class="text-xl font-bold text-orange-400 h-6"></p>
+    <button id="ttt-reset" class="mt-4 px-4 py-2 bg-orange-600/50 hover:bg-orange-600 text-white rounded transition-colors hidden mx-auto">Reintentar</button>
+  `;
+  btnTicTacToe.addEventListener('click', () => {
+    openModal(tttHTML, initTicTacToe);
+  });
+  function initTicTacToe() {
+    const grid = document.getElementById('ttt-grid')!;
+    const msg = document.getElementById('ttt-msg')!;
+    const reset = document.getElementById('ttt-reset')!;
+    let board = Array(9).fill('');
+    let gameActive = true;
+    
+    function checkWin(b: string[]) {
+      const lines = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+      ];
+      for (let i = 0; i < lines.length; i++) {
+        const [x, y, z] = lines[i];
+        if (b[x] && b[x] === b[y] && b[x] === b[z]) return b[x];
+      }
+      if (!b.includes('')) return 'draw';
+      return null;
+    }
+    
+    function botMove() {
+      if(!gameActive) return;
+      let empty = board.map((v, i) => v === '' ? i : -1).filter(v => v !== -1);
+      if(empty.length === 0) return;
+      // Bot elige al azar
+      const move = empty[Math.floor(Math.random() * empty.length)];
+      board[move] = '💻';
+      render();
+      checkState();
+    }
+    
+    function checkState() {
+      const winner = checkWin(board);
+      if(winner) {
+        gameActive = false;
+        if(winner === 'draw') msg.innerText = "¡Empate técnico!";
+        else if(winner === '❤️') msg.innerText = "¡Ganaste mi corazón! 🥰";
+        else msg.innerText = "¡AmorBot gana! 🤖";
+        reset.style.display = 'block';
+      }
+    }
+    
+    function render() {
+      grid.innerHTML = '';
+      board.forEach((val, i) => {
+        const cell = document.createElement('div');
+        cell.className = "bg-[var(--color-love-dark)] flex items-center justify-center text-3xl cursor-pointer rounded border border-orange-500/20";
+        cell.innerText = val;
+        cell.onclick = () => {
+          if(val || !gameActive) return;
+          board[i] = '❤️';
+          render();
+          checkState();
+          if(gameActive) setTimeout(botMove, 400);
+        };
+        grid.appendChild(cell);
+      });
+    }
+    
+    reset.onclick = () => {
+      board = Array(9).fill('');
+      gameActive = true;
+      msg.innerText = '';
+      reset.style.display = 'none';
+      render();
+    };
+    render();
+  }
 
 
   // --- Juego de Snake ---
