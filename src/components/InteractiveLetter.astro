@@ -104,25 +104,25 @@
     };
     const pieces: Piece[] = [];
 
-    // Lanzar todo el confeti de golpe en 3 oleadas rápidas
+    // 5 oleadas de 20 corazones cada 120ms — velocidad moderada
     let launched = 0;
     const launcher = setInterval(() => {
-      for(let i = 0; i < 40; i++) {
+      for(let i = 0; i < 20; i++) {
         pieces.push({
           x: Math.random() * canvas.width,
-          y: -20,
-          vx: (Math.random() - 0.5) * 8,
-          vy: Math.random() * 8 + 4,
+          y: -30,
+          vx: (Math.random() - 0.5) * 5,
+          vy: Math.random() * 4 + 4,
           rotation: Math.random() * 360,
-          rotSpeed: (Math.random() - 0.5) * 12,
-          size: Math.random() * 22 + 16,
+          rotSpeed: (Math.random() - 0.5) * 8,
+          size: Math.random() * 18 + 14,
           emoji: emojis[Math.floor(Math.random() * emojis.length)],
           alpha: 1
         });
       }
       launched++;
-      if(launched >= 3) clearInterval(launcher);
-    }, 80);
+      if(launched >= 5) clearInterval(launcher);
+    }, 120);
 
     // Animación con física
     let animId: number;
@@ -132,7 +132,7 @@
       for(const p of pieces) {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.08; // gravedad
+        p.vy += 0.1; // gravedad moderada
         p.vx *= 0.99; // fricción aire
         p.rotation += p.rotSpeed;
         // Desvanecer al llegar al fondo
@@ -149,7 +149,7 @@
         ctx.fillText(p.emoji, 0, 0);
         ctx.restore();
       }
-      if(alive || launched < 3) {
+      if(alive || launched < 5) {
         animId = requestAnimationFrame(animate);
       } else {
         canvas.remove();
@@ -175,7 +175,7 @@
       
       // Animar máquina de escribir
       let i = 0;
-      const speed = 18; // milisegundos
+      const speed = 30; // milisegundos — velocidad moderada de lectura
       
       function typeWriter() {
         if (i < letterContent.length) {
