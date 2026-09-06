@@ -90,6 +90,33 @@
     if(isOpened) return;
     isOpened = true;
     
+    // Explosión de corazones y magia
+    for(let j = 0; j < 50; j++) {
+      const heart = document.createElement('div');
+      heart.innerText = ['❤️', '💖', '💕', '✨', '🕷️'][Math.floor(Math.random() * 5)];
+      heart.style.position = 'fixed';
+      heart.style.left = '50%';
+      heart.style.top = '50%';
+      heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
+      heart.style.pointerEvents = 'none';
+      heart.style.zIndex = '1000';
+      heart.style.transition = 'transform 1.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.5s ease-out';
+      
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = Math.random() * 300 + 50;
+      const tx = Math.cos(angle) * velocity;
+      const ty = Math.sin(angle) * velocity - (Math.random() * 150 + 50);
+      
+      document.body.appendChild(heart);
+      
+      requestAnimationFrame(() => {
+        heart.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(${Math.random() + 0.5})`;
+        heart.style.opacity = '0';
+      });
+      
+      setTimeout(() => heart.remove(), 1500);
+    }
+
     // Animar sobre
     seal.style.opacity = '0';
     flap.style.transform = 'rotateX(180deg)';
